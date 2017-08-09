@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    targetNamespace="http://ftn.uns.ac.rs/nalog" xmlns:nal="http://ftn.uns.ac.rs/nalog"
+    xmlns:tip="http://ftn.uns.ac.rs/tipovi">
+
+    <xs:import namespace="http://ftn.uns.ac.rs/tipovi" schemaLocation="tipovi.xsd" id="tip"/>
+    <xs:complexType name="nalog">
+       
+            <xs:sequence>
+                <xs:element name="idPoruke" type="tip:tipIDporuke"/>
+                <xs:element name="duznik" type="tip:tipString255"/>
+                <xs:element name="svrhaPlacanja" type="tip:tipString255"/>
+                <xs:element name="primalac" type="tip:tipString255"/>
+                <xs:element name="datumNaloga" type="xs:date"/>
+                <xs:element name="datumValute" type="xs:date"/>
+                <xs:element name="racunDuznik" type="tip:tipRacun"/>
+                <xs:element name="modelZaduzenja">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:positiveInteger">
+                            <xs:totalDigits value="2"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="pozivNaBrZaduzenja" type="tip:pozivNaBroj"/>
+                <xs:element name="racunPoverioca" type="tip:tipRacun"/>
+                <xs:element name="modelOdobrenja">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:positiveInteger">
+                            <xs:totalDigits value="2"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="pozivNaBrOdobrenja" type="tip:pozivNaBroj"/>
+                <xs:element name="iznos" type="tip:tipDec15_2"/>
+                <xs:element name="oznakaValute">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:length value="3"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="hitno" type="xs:boolean"/>
+            </xs:sequence>
+        
+    </xs:complexType>
+</xs:schema>

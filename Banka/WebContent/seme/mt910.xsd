@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    targetNamespace="http://ftn.uns.ac.rs/mt910" xmlns:mt910="http://ftn.uns.ac.rs/mt910"
+    xmlns:tip="http://ftn.uns.ac.rs/tipovi">
+
+    <xs:import namespace="http://ftn.uns.ac.rs/tipovi" schemaLocation="tipovi.xsd"/>
+    <xs:complexType name="mt910">
+        <xs:sequence>
+            <xs:element name="idPoruke" type="tip:tipIDporuke"/>
+            <xs:element name="swiftBanPoverioc" type="tip:swiftKod"/>
+            <xs:element name="obracunskiRacBanPoverioc">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:length value="20"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="idPorukeNaloga">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="50"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="datumValute" type="xs:date"/>
+            <xs:element name="iznos" type="tip:tipDec15_2"/>
+            <xs:element name="sifraValute">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:length value="3"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

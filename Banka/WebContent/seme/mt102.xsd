@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    targetNamespace="http://ftn.uns.ac.rs/mt102" xmlns:mt102="http://ftn.uns.ac.rs/mt102"
+    xmlns:tip="http://ftn.uns.ac.rs/tipovi">
+
+    <xs:import namespace="http://ftn.uns.ac.rs/tipovi" schemaLocation="tipovi.xsd" id="tip"/>
+    <xs:complexType name="mt102">
+        <xs:sequence>
+            <xs:element ref="mt102:zaglavljeMt102"/>
+            <xs:element ref="mt102:pojedinacnoPlacanjeMt102"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="zaglavljeMt102">
+        <xs:sequence>
+            <xs:element name="idPoruke" type="tip:tipIDporuke"/>
+            <xs:element name="swiftBankaDuznik" type="tip:swiftKod"/>
+            <xs:element name="obracunskiRacBanDuznik" type="tip:tipRacun"/>
+            <xs:element name="swiftBankaPoverioc" type="tip:swiftKod"/>
+            <xs:element name="obracunskiRacunBanPoverioc" type="tip:tipRacun"/>
+            <xs:element name="ukupanIznos" type="tip:tipDec15_2"/>
+            <xs:element name="sifraValute">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:length value="3"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="datumValute" type="xs:date"/>
+            <xs:element name="datum" type="xs:date"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="pojedinacnoPlacanjeMt102">
+        <xs:sequence>
+            <xs:element name="idNaloga">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                        <xs:maxLength value="50"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="duznik" type="tip:tipString255"/>
+            <xs:element name="svrhaPlacanja" type="tip:tipString255"/>
+            <xs:element name="primalac" type="tip:tipString255"/>
+            <xs:element name="datumNaloga" type="xs:date"/>
+            <xs:element name="racunDuznik" type="tip:tipRacun"/>
+            <xs:element name="modelZaduzenja">
+                <xs:simpleType>
+                    <xs:restriction base="xs:positiveInteger">
+                        <xs:totalDigits value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="pozivNaBrZaduzenja">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:length value="20"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="racunPoverioc" type="tip:tipRacun"/>
+            <xs:element name="modelOdobrenja">
+                <xs:simpleType>
+                    <xs:restriction base="xs:positiveInteger">
+                        <xs:totalDigits value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="pozivNaBrOdobrenja">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:length value="20"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="iznos" type="tip:tipDec15_2"/>
+            <xs:element name="sifraValute">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:length value="3"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="zaglavljeMt102" type="mt102:zaglavljeMt102"/>
+    <xs:element name="pojedinacnoPlacanjeMt102" type="mt102:pojedinacnoPlacanjeMt102"/>
+</xs:schema>
