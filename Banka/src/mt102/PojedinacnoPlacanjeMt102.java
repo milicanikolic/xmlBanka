@@ -132,6 +132,9 @@ public class PojedinacnoPlacanjeMt102 {
     @XmlElement(required = true)
     protected String sifraValute;
 
+    public PojedinacnoPlacanjeMt102(){
+    	
+    }
     /**
      * Gets the value of the idNaloga property.
      * 

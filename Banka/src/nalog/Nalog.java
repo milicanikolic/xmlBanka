@@ -121,6 +121,10 @@ public class Nalog {
     protected String oznakaValute;
     protected boolean hitno;
 
+    public Nalog(){
+    	
+    }
+    
     /**
      * Gets the value of the idPoruke property.
      * 

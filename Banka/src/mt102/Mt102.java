@@ -46,6 +46,10 @@ public class Mt102 {
     @XmlElement(required = true)
     protected PojedinacnoPlacanjeMt102 pojedinacnoPlacanjeMt102;
 
+    
+    public Mt102(){
+    	
+    }
     /**
      * Gets the value of the zaglavljeMt102 property.
      * 

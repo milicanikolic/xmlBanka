@@ -85,6 +85,9 @@ public class ZaglavljeMt102 {
     @XmlSchemaType(name = "date")
     protected XMLGregorianCalendar datum;
 
+    public ZaglavljeMt102(){
+    	
+    }
     /**
      * Gets the value of the idPoruke property.
      * 
