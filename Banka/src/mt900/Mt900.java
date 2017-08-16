@@ -87,6 +87,8 @@ public class Mt900 {
     protected BigDecimal iznos;
     @XmlElement(required = true)
     protected String sifraValute;
+    
+  //  protected String racunDuznika;
 
     /**
      * Gets the value of the idPoruke property.
@@ -256,4 +258,13 @@ public class Mt900 {
         this.sifraValute = value;
     }
 
+//	public String getRacunDuznika() {
+//		return racunDuznika;
+//	}
+//
+//	public void setRacunDuznika(String racunDuznika) {
+//		this.racunDuznika = racunDuznika;
+//	}
+
+    
 }

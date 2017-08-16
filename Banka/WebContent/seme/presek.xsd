@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    targetNamespace="http://ftn.uns.ac.rs/presek" xmlns:pre="http://ftn.uns.ac.rs/presek"
+    xmlns:tip="http://ftn.uns.ac.rs/tipovi">
+
+    <xs:import namespace="http://ftn.uns.ac.rs/tipovi" schemaLocation="tipovi.xsd"/>
+    <xs:complexType name="presek">
+        <xs:sequence>
+            <xs:element ref="pre:zaglavljePreseka"/>
+            <xs:element maxOccurs="unbounded" ref="pre:stavkaPreseka"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="zaglavljePreseka">
+        <xs:sequence>
+            <xs:element name="brojRacuna" type="tip:tipRacun"/>
+            <xs:element name="datumNaloga" type="xs:date"/>
+            <xs:element name="brojPreseka">
+                <xs:simpleType>
+                    <xs:restriction base="xs:positiveInteger">
+                        <xs:totalDigits value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="prethodnoStanje" type="tip:tipDec15_2"/>
+            <xs:element name="brPromenaUKorist">
+                <xs:simpleType>
+                    <xs:restriction base="xs:positiveInteger">
+                        <xs:maxInclusive value="6"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="ukupnoUKorist" type="tip:tipDec15_2"/>
+            <xs:element name="brPromenaNaTeret">
+                <xs:simpleType>
+                    <xs:restriction base="xs:positiveInteger">
+                        <xs:maxInclusive value="6"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="ukupnoNaTeret" type="tip:tipDec15_2"/>
+            <xs:element name="novoStanje" type="tip:tipDec15_2"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="stavkaPreseka">
+        <xs:sequence>
+            <xs:element name="duznik" type="tip:tipString255"/>
+            <xs:element name="svrhaPlacanja" type="tip:tipString255"/>
+            <xs:element name="primalac" type="tip:tipString255"/>
+            <xs:element name="datumNaloga" type="xs:date"/>
+            <xs:element name="datumValute" type="xs:date"/>
+            <xs:element name="racunDuznika" type="tip:tipRacun"/>
+            <xs:element name="modelZaduzenja">
+                <xs:simpleType>
+                    <xs:restriction base="xs:positiveInteger">
+                        <xs:totalDigits value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="pozivNaBrZaduzenja">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:length value="20"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="racunPrimaoca" type="tip:tipRacun"/>
+            <xs:element name="modelOdobrenja">
+                <xs:simpleType>
+                    <xs:restriction base="xs:positiveInteger">
+                        <xs:totalDigits value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="pozivNaBrOdobrenja">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:length value="20"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="iznos" type="tip:tipDec15_2"/>
+            <xs:element name="smer">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:length value="1"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="zaglavljePreseka" type="pre:zaglavljePreseka"/>
+    <xs:element name="stavkaPreseka" type="pre:stavkaPreseka"/>
+</xs:schema>

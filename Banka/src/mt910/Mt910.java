@@ -256,5 +256,9 @@ public class Mt910 {
     public void setSifraValute(String value) {
         this.sifraValute = value;
     }
+    
+    public String toString(){
+    	return "ID poruke: " + this.idPoruke + ", swift kod banke poverioc:" + this.swiftBanPoverioc + ", obracunski racun banke poverioc: " + this.obracunskiRacBanPoverioc + ", ID poruke naloga: " + this.idPorukeNaloga + ", datum valute" + this.datumValute + ", iznos: " + this.iznos + ", sifra valute: " + this.sifraValute;
+    }
 
 }

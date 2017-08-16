@@ -8,5 +8,35 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-codec-1.7.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/httpclient-4.1.1.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/httpcore-4.1.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-all-1.9.0.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-annotations-2.8.3.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-core-2.8.3.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-databind-2.8.3.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/java-client-api-3.0.7.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/javaee-api-7.0.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/javax.ejb.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/javax.jws-3.1.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/javax.ws.rs-api-2.0.rev.A.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jaxb-api-2.2.3.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jaxb-impl-2.2.4.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jaxb-impl-2.2.7.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jaxb-xjc-2.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jersey-apache-client4-1.17.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jersey-client-1.17.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jersey-core-1.17.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jersey-multipart-1.17.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/logback-classic-1.1.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/logback-core-1.1.2.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/mimepull-1.6.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/mimepull-1.9.4.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/org.json.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/resteasy-jaxb-provider-2.3.0.GA.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/resteasy-jettison-provider-2.3.5.Final.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/slf4j-api-1.7.4.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jackson-jaxrs-providers-master"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

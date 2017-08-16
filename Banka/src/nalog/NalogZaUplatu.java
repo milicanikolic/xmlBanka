@@ -9,7 +9,6 @@ import javax.jws.soap.SOAPBinding.Use;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 
-import mt102.Mt102;
 
 @WebService(
 		targetNamespace = "http://ftn.uns.ac.rs/nalog"
@@ -17,8 +16,17 @@ import mt102.Mt102;
 @SOAPBinding(style =Style.DOCUMENT, use = Use.LITERAL, parameterStyle = ParameterStyle.WRAPPED)
 public interface NalogZaUplatu {
 	
-	@RequestWrapper(className="nalog.data.ObradiNalog")
-	@ResponseWrapper(className="nalog.data.ObradiNalogResponse")
-	public void obradiNalog(@WebParam(name="nalog")Nalog nalog);//, targetNamespace="http://ftn.uns.ac.rs/nalog")Nalog nalog);
+	@RequestWrapper(className="nalog.data.NalogRequest")
+	@ResponseWrapper(className="nalog.data.StringResponse")
+	public String obradiNalog(@WebParam(name="nalog")Nalog nalog);//, targetNamespace="http://ftn.uns.ac.rs/nalog")Nalog nalog);
+	
+	/*@RequestWrapper(className="nalog.data.Mt900Request")
+	public void primiMt900(@WebParam(name="mt900")Mt900 mt900);
+	
 
+	public void odobriSredstva(Mt103 mt103, Mt910 mt910);
+	
+	@RequestWrapper(className="nalog.data.ZahtevZaIzvodRequest")
+	@ResponseWrapper(className="nalog.data.ZahtevZaIzvodResponse")
+	public Presek obradiZahtevZaIzvod(@WebParam(name="zahtevZaIzvod")ZahtevZaIzvod zahtevZaIzvod);*/
 }

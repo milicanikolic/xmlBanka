@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    targetNamespace="http://ftn.uns.ac.rs/zahtev" xmlns:tip="http://ftn.uns.ac.rs/tipovi"
+    xmlns:zah="http://ftn.uns.ac.rs/zahtev">
+
+    <xs:import namespace="http://ftn.uns.ac.rs/tipovi" schemaLocation="tipovi.xsd" id="tip"/>
+    <xs:complexType name="zahtevZaIzvod">
+        <xs:sequence>
+            <xs:element name="brojRacuna" type="tip:tipRacun"/>
+            <xs:element name="datum" type="xs:date"/>
+            <xs:element name="rbrPreseka">
+                <xs:simpleType>
+                    <xs:restriction base="xs:positiveInteger">
+                        <xs:totalDigits value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

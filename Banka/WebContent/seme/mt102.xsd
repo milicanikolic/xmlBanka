@@ -7,7 +7,7 @@
     <xs:complexType name="mt102">
         <xs:sequence>
             <xs:element ref="mt102:zaglavljeMt102"/>
-            <xs:element ref="mt102:pojedinacnoPlacanjeMt102"/>
+            <xs:element ref="mt102:pojedinacnoPlacanjeMt102" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="zaglavljeMt102">

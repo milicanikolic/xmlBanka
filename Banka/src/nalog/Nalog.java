@@ -10,9 +10,11 @@ package nalog;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -69,6 +71,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  * 
  */
+@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "nalog", propOrder = {
     "idPoruke",
@@ -81,7 +84,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "modelZaduzenja",
     "pozivNaBrZaduzenja",
     "racunPoverioca",
-    "modelOdobrenja",
+   "modelOdobrenja",
     "pozivNaBrOdobrenja",
     "iznos",
     "oznakaValute",
@@ -89,7 +92,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 })
 public class Nalog {
 
-    @XmlElement(required = true)
+   @XmlElement(required = true)
     protected String idPoruke;
     @XmlElement(required = true)
     protected String duznik;
@@ -111,7 +114,7 @@ public class Nalog {
     protected String pozivNaBrZaduzenja;
     @XmlElement(required = true)
     protected String racunPoverioca;
-    @XmlElement(required = true)
+   @XmlElement(required = true)
     protected BigInteger modelOdobrenja;
     @XmlElement(required = true)
     protected String pozivNaBrOdobrenja;
@@ -132,7 +135,7 @@ public class Nalog {
      *     possible object is
      *     {@link String }
      *     
-     */
+//     */
     public String getIdPoruke() {
         return idPoruke;
     }
@@ -476,5 +479,6 @@ public class Nalog {
     public void setHitno(boolean value) {
         this.hitno = value;
     }
+
 
 }
