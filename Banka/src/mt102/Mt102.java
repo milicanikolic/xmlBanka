@@ -10,9 +10,11 @@ package mt102;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -36,6 +38,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  * 
  */
+@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "mt102", propOrder = {
     "zaglavljeMt102",
@@ -100,5 +103,14 @@ public class Mt102 {
         }
         return this.pojedinacnoPlacanjeMt102;
     }
+
+	public Mt102() {
+		super();
+	}
+    
+	public void dodajPlacanje(PojedinacnoPlacanjeMt102 pp) {
+		pojedinacnoPlacanjeMt102.add(pp);
+	}
+    
 
 }

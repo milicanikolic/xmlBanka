@@ -2,14 +2,11 @@ package banka;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import nalog.Nalog;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -27,7 +24,7 @@ public class Banka implements Serializable {
 	private String swiftCode;
 	private HashMap<String, String> racunFirme;
 	public  HashMap<String,RacunUBanci> racunIznos; //broj racuna firme, iznosi na racunu
-	private HashMap<String,ArrayList<Nalog>> uplata; //broj racuna firme, lista njenih primljenih i poslatih uplata 
+	//private HashMap<String,ArrayList<Nalog>> uplata; //broj racuna firme, lista njenih primljenih i poslatih uplata 
 	private BigDecimal iznosObracunskiRacun;
 	
 	
@@ -35,14 +32,14 @@ public class Banka implements Serializable {
 		super();
 		racunFirme = new HashMap<String, String>();
 		racunIznos= new HashMap<String,RacunUBanci>();
-		uplata=new HashMap<String, ArrayList<Nalog>>();
+	
 	}
 
 	public Banka(String naziv, String oznakaBanke,String obracunskiRacun, String swiftCode, BigDecimal iznosObracunskiRacun) {
 		super();
 		racunFirme = new HashMap<String, String>();
 		racunIznos= new HashMap<String,RacunUBanci>();
-		uplata=new HashMap<String, ArrayList<Nalog>>();
+		
 		this.naziv = naziv;
 		this.oznakaBanke=oznakaBanke;
 		this.obracunskiRacun = obracunskiRacun;
@@ -74,13 +71,7 @@ public class Banka implements Serializable {
 		this.obracunskiRacun = obracunskiRacun;
 	}
 
-	public HashMap<String, String> getRacuniFirmi() {
-		return racunFirme;
-	}
-
-	public void setRacuniFirmi(HashMap<String, String> racuniFirmi) {
-		this.racunFirme = racuniFirmi;
-	}
+	
 
 
 	public HashMap<String, RacunUBanci> getRacunIznos() {
@@ -91,13 +82,7 @@ public class Banka implements Serializable {
 		this.racunIznos = racunIznos;
 	}
 
-	public HashMap<String, ArrayList<Nalog>> getUplate() {
-		return uplata;
-	}
-
-	public void setUplate(HashMap<String, ArrayList<Nalog>> uplate) {
-		this.uplata = uplate;
-	}
+	
 
 	public String getOznakaBanke() {
 		return oznakaBanke;
@@ -132,9 +117,6 @@ public class Banka implements Serializable {
 		racunIznos.put(brRacuna, racun);
 	}
 	
-	public void dodajUplatu(String racun, ArrayList<Nalog> nalozi) {
-		uplata.put(racun, nalozi);
-	}
 	
 
 }

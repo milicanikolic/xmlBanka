@@ -305,4 +305,7 @@ public class ZaglavljeMt102 {
     	ukupanIznos=new BigDecimal(0);
     }
 
+	
+
+    
 }
