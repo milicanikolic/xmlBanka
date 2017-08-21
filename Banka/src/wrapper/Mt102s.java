@@ -1,4 +1,4 @@
-package mt102;
+package wrapper;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -8,20 +8,19 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import rs.ac.uns.ftn.mt102.Mt102;
+
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Mt102s implements Serializable{
+public class Mt102s implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5024793907653061900L;
-	
+
 	private List<Mt102> mt102s;
-	
+
 	public Mt102s() {
 		super();
-		mt102s=new ArrayList<Mt102>();
+		mt102s = new ArrayList<Mt102>();
 	}
 
 	public List<Mt102> getMt102s() {
@@ -31,7 +30,7 @@ public class Mt102s implements Serializable{
 	public void setMt102s(List<Mt102> mt102s) {
 		this.mt102s = mt102s;
 	}
-	
+
 	public void dodajMt102(Mt102 mt102) {
 		mt102s.add(mt102);
 	}

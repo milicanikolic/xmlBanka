@@ -3,13 +3,13 @@
     targetNamespace="http://ftn.uns.ac.rs/mt103" xmlns:mt103="http://ftn.uns.ac.rs/mt103"
     xmlns:tip="http://ftn.uns.ac.rs/tipovi">
 
-    <xs:import namespace="http://ftn.uns.ac.rs/tipovi"
-        schemaLocation="tipovi.xsd"/>
+    <xs:import namespace="http://ftn.uns.ac.rs/tipovi" schemaLocation="tipovi.xsd"/>
     <xs:complexType name="mt103">
         <xs:sequence>
             <xs:element name="idPoruke" type="tip:tipIDporuke"/>
             <xs:element name="swiftBanDuznik" type="tip:swiftKod"/>
             <xs:element name="obracunskiRacBankeDuznik" type="tip:tipRacun"/>
+            <xs:element name="obracunskiRacunBankePoverioca" type="tip:tipRacun"/>
             <xs:element name="swiftBanPoverioc" type="tip:swiftKod"/>
             <xs:element name="duznik" type="tip:tipString255"/>
             <xs:element name="svrhaPlacanja" type="tip:tipString255"/>

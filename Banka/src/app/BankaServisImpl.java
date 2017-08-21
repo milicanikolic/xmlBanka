@@ -1,9 +1,11 @@
-package nalog;
+package app;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.UUID;
 
 import javax.jws.WebService;
@@ -11,27 +13,50 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.ws.Service;
 
-import mt102.Mt102;
-import mt102.PojedinacnoPlacanjeMt102;
-import mt102.ZaglavljeMt102;
-import mt103.Mt103;
-import app.StartApp;
+import mt900.Mt900;
+import mt910.Mt910;
+import nalog.Nalog;
+import presek.Presek;
+import presek.StavkaPreseka;
+import presek.ZaglavljePreseka;
+import rs.ac.uns.ftn.cb.CentralnaBankaServis;
+import rs.ac.uns.ftn.mt102.Mt102;
+import rs.ac.uns.ftn.mt102.PojedinacnoPlacanjeMt102;
+import rs.ac.uns.ftn.mt102.ZaglavljeMt102;
+import rs.ac.uns.ftn.mt103.Mt103;
+import wrapper.Nalozi;
+import zahtevZaIzvod.ZahtevZaIzvod;
 import banka.Banka;
 import banka.Uplata;
 
 import com.marklogic.client.eval.ServerEvaluationCall;
 
-@WebService(portName = "NalogZaUplatu", serviceName = "NalogZaUplatuService", targetNamespace = "http://ftn.uns.ac.rs/banka", endpointInterface = "nalog.NalogZaUplatu")
+@WebService(portName = "Banka", serviceName = "BankaServis", targetNamespace = "http://ftn.uns.ac.rs/banka", endpointInterface = "app.BankaServis")
 // wsdlLocation = "WEB-INF/wsdl/NalogZaUplatu.wsdl")
 // name = "NalogZaUplatu")
-public class NalogZaUplatuImpl implements NalogZaUplatu {
+public class BankaServisImpl implements BankaServis {
+	
+
+	private URL wsdlCB;
+
+   private QName serviceNameCB = new QName("http://ftn.uns.ac.rs/CB","CentralnaBankaServis");
+   private QName portNameCB = new QName("http://ftn.uns.ac.rs/CB","CentralnaBanka");
+	
 
 	public String obradiNalog(Nalog nalog) {
 		System.out.println("MILICEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-
+		
+		try {
+			wsdlCB=new URL("http://SarvanLaptop:8083/CentralnaBanka/CentralnaBankaServis?wsdl");
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		String oznakaBankeDuznika = nalog.getRacunDuznik().substring(0, 3);
 		System.out.println("racun duznika u banci sa oznakom "
 				+ oznakaBankeDuznika);
@@ -78,21 +103,6 @@ public class NalogZaUplatuImpl implements NalogZaUplatu {
 					.get(nalog.getRacunDuznik()).getRaspolozivoStanje();
 			BigDecimal iznos2 = bankaPrimaoca.getRacunIznos()
 					.get(nalog.getRacunPoverioca()).getRaspolozivoStanje();
-			/*
-			 * RacunUBanci racunDuznik = bankaDuznika.getRacunIznos().get(
-			 * nalog.getRacunDuznik());
-			 * racunDuznik.setRaspolozivoStanje(iznos.subtract
-			 * (nalog.getIznos()));
-			 * 
-			 * RacunUBanci racunPoverioc = bankaDuznika.getRacunIznos().get(
-			 * nalog.getRacunPoverioca());
-			 * racunPoverioc.setRaspolozivoStanje(iznos2.add(nalog.getIznos()));
-			 * 
-			 * bankaDuznika.getRacunIznos().put(nalog.getRacunDuznik(),
-			 * racunDuznik);
-			 * bankaDuznika.getRacunIznos().put(nalog.getRacunPoverioca(),
-			 * racunPoverioc);
-			 */
 
 			bankaDuznika.getRacunIznos().get(nalog.getRacunDuznik())
 					.setRaspolozivoStanje(iznos.subtract(nalog.getIznos()));
@@ -106,8 +116,6 @@ public class NalogZaUplatuImpl implements NalogZaUplatu {
 					+ bankaDuznika.getRacunIznos()
 							.get(nalog.getRacunPoverioca())
 							.getRaspolozivoStanje());
-			// System.out.println("racun duznik "
-			// + racunDuznik.getRaspolozivoStanje());
 
 			try {
 
@@ -170,11 +178,7 @@ public class NalogZaUplatuImpl implements NalogZaUplatu {
 					String kon = sw.toString().substring(
 							sw.toString().indexOf("uplata") - 1,
 							sw.toString().length());
-					// String ns = new
-					// StringBuilder(kon).insert(kon.toString().indexOf("uplata")
-					// + 7,
-					// "xmlns:ns2='http://ftn.uns.ac.rs/nalog'").toString();
-					// System.out.println("ns " +ns);
+
 					System.out.println("kon " + kon);
 					String upit = "xdmp:node-insert-child(doc('/content/uplata.xml')/uplate,"
 							+ kon + ");";
@@ -219,12 +223,22 @@ public class NalogZaUplatuImpl implements NalogZaUplatu {
 				// slucaj kad je hitan nalog i iznos veci od 250 000
 				// !!!! proveri da li se ovako menja, ako ne, onda treba jos
 				// setovati ove vrednosti!!!!!!
-				bankaDuznika.getRacunIznos().get(nalog.getRacunDuznik())
-				.setRezervisanoStanje(bankaDuznika.getRacunIznos().get(nalog.getRacunDuznik())
-						.getRezervisanoStanje().add(nalog.getIznos()));
-				bankaDuznika.getRacunIznos().get(nalog.getRacunDuznik())
-				.setRaspolozivoStanje(bankaDuznika.getRacunIznos().get(nalog.getRacunDuznik())
-						.getRaspolozivoStanje().subtract(nalog.getIznos()));
+				bankaDuznika
+						.getRacunIznos()
+						.get(nalog.getRacunDuznik())
+						.setRezervisanoStanje(
+								bankaDuznika.getRacunIznos()
+										.get(nalog.getRacunDuznik())
+										.getRezervisanoStanje()
+										.add(nalog.getIznos()));
+				bankaDuznika
+						.getRacunIznos()
+						.get(nalog.getRacunDuznik())
+						.setRaspolozivoStanje(
+								bankaDuznika.getRacunIznos()
+										.get(nalog.getRacunDuznik())
+										.getRaspolozivoStanje()
+										.subtract(nalog.getIznos()));
 
 				try {
 
@@ -253,16 +267,13 @@ public class NalogZaUplatuImpl implements NalogZaUplatu {
 				mt103.setDatumNaloga(nalog.getDatumNaloga());
 				mt103.setDatumValute(nalog.getDatumValute());
 				mt103.setDuznik(nalog.getDuznik());
-				mt103.setIdPoruke(UUID.randomUUID().toString());// nzm je l
-																// treba da se
-																// uzme sa
-																// naloga ili
-																// ovaj novi
+				mt103.setIdPoruke(nalog.getIdPoruke());
 				mt103.setIznos(nalog.getIznos());
 				mt103.setModelOdobrenja(nalog.getModelOdobrenja());
 				mt103.setModelZaduzenja(nalog.getModelZaduzenja());
 				mt103.setObracunskiRacBankeDuznik(bankaDuznika
 						.getObracunskiRacun());
+		//		mt103.setObracunskiRacunBankePoverioca(bankaPrimaoca.getObracunskiRacun());
 				mt103.setPozivNaBrOdobrenja(nalog.getPozivNaBrOdobrenja());
 				mt103.setPozivNaBrojZaduzenja(nalog.getPozivNaBrZaduzenja());
 				mt103.setPrimalac(nalog.getPrimalac());
@@ -280,7 +291,8 @@ public class NalogZaUplatuImpl implements NalogZaUplatu {
 					String kon = sw.toString().substring(
 							sw.toString().indexOf("mt103") - 1,
 							sw.toString().length());
-					String upit ="declare namespace mt103='http://ftn.uns.ac.rs/mt103';" + " xdmp:node-insert-child(doc('/content/mt103.xml')/mt103:mt103S,"
+					String upit = "declare namespace mt103='http://ftn.uns.ac.rs/mt103';"
+							+ " xdmp:node-insert-child(doc('/content/mt103.xml')/mt103:mt103S,"
 							+ kon + ");";
 					posaljiUpit(upit);
 					System.out.println(kon.toString());
@@ -305,11 +317,7 @@ public class NalogZaUplatuImpl implements NalogZaUplatu {
 						String kon = sw.toString().substring(
 								sw.toString().indexOf("uplata") - 1,
 								sw.toString().length());
-						// String ns = new
-						// StringBuilder(kon).insert(kon.toString().indexOf("uplata")
-						// + 7,
-						// "xmlns:ns2='http://ftn.uns.ac.rs/nalog'").toString();
-						// System.out.println("ns " +ns);
+
 						System.out.println("kon " + kon);
 						String upit = "xdmp:node-insert-child(doc('/content/uplata.xml')/uplate,"
 								+ kon + ");";
@@ -346,16 +354,27 @@ public class NalogZaUplatuImpl implements NalogZaUplatu {
 				}
 
 				// TREBA DA SE POSALJE MT103 CENTRALNOJ BANCI
+				
+				Service service = Service.create(wsdlCB, serviceNameCB);
+			      CentralnaBankaServis inter = service
+			               .getPort(portNameCB, CentralnaBankaServis.class);
+
+			       inter.primiMt103(mt103);
 
 			} else if (broj < 0) {
 				// CLEARING AND SETTLEMENT
-
+				System.out.println("ISPIS PRe ekSPEsna");
+				System.out.println(nalog.getRacunDuznik());
+				System.out.println(bankaDuznika.getRacunIznos().get(nalog.getRacunDuznik()));
+				System.out.println(nalog.getIznos());
 				// SAD RZERVISEM PARE DUZNIKU
 				BigDecimal novoRezStanje = bankaDuznika.getRacunIznos()
 						.get(nalog.getRacunDuznik()).getRezervisanoStanje()
 						.add(nalog.getIznos());
 				bankaDuznika.getRacunIznos().get(nalog.getRacunDuznik())
 						.setRezervisanoStanje(novoRezStanje);
+				
+				System.out.println("REZerVISANO StaNJE: " + bankaDuznika.getRacunIznos().get(nalog.getRacunDuznik()).getRezervisanoStanje());
 
 				bankaDuznika
 						.getRacunIznos()
@@ -597,94 +616,312 @@ public class NalogZaUplatuImpl implements NalogZaUplatu {
 
 				}
 
-				// mislim da treba da se upise ta lista uplata u bazu, tj valjda
-				// da se update-uje
-
 			}
 
 		}
 		return "Evo ti glupi string";
 	}
 
-	/*
-	 * @Override public void primiMt900(Mt900 mt900) { //ISCITAJ BANKU IZ
-	 * BAZE,PO OBRACUNSKOM RACUNU BANKE DUYNIKA //MOZDA NE TREBA DA SE CITA IZ
-	 * BANKE NEGO GORE DA SE IZVUCE Banka bankaDuznika=null;
-	 * 
-	 * String idNaloga=mt900.getIdPorukeNaloga(); Nalog nal=null;//uzmi iz baze
-	 * nalog po idNaloga String brojRacunaDuznik=nal.getRacunDuznik();
-	 * 
-	 * //vracam banci rezervisane pare, posto ce CB da skine banci sa racuna
-	 * iznos sa naloga.
-	 * bankaDuznika.setIznosObracunskiRacun(bankaDuznika.getIznosObracunskiRacun
-	 * (
-	 * ).add(bankaDuznika.getRacunIznos().get(brojRacunaDuznik).getRezervisanoStanje
-	 * ())); //mislim da treba da se update-uje racun od banke, jer sam menjala
-	 * iznos
-	 * 
-	 * //SAD SKIDAM IZNOS SA RACUNA DUZNIKA TAKO STO MU UZMEM REZERVISANO
-	 * bankaDuznika
-	 * .getRacunIznos().get(brojRacunaDuznik).setRezervisanoStanje(new
-	 * BigDecimal(0)); //UPISI NOVO RACUN IZNOS U BANKUDUYNIKA NA NJEGOVO MESTO
-	 * U MAPI PO NJEGOVOM RACUNU
-	 * 
-	 * }
-	 * 
-	 * @Override public void odobriSredstva(Mt103 mt103, Mt910 mt910) { //IZ
-	 * BAZE UZMI BANKU PO OBRACUNSKOM RACUNU BANKE POVERIOCA IZ MT900 String
-	 * obracunskiRacBanPoverioca = mt910.getObracunskiRacBanPoverioc(); Banka
-	 * bankaPoverioca=null;//ovde strpaj ovu iz baze
-	 * 
-	 * BigDecimal
-	 * noviIznos=bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca
-	 * ()).getRaspolozivoStanje().add(mt103.getIznos());
-	 * bankaPoverioca.getRacunIznos
-	 * ().get(mt103.getRacunPoverioca()).setRaspolozivoStanje(noviIznos);
-	 * //upisi u bazu racuna u banci
-	 * 
-	 * //sad smanjujem pare sa bankinog racuna, posto je druga firma uplatila na
-	 * bankin racun
-	 * bankaPoverioca.setIznosObracunskiRacun(bankaPoverioca.getIznosObracunskiRacun
-	 * ().subtract(mt103.getIznos())); //mislim da treba da se update-uje racun
-	 * od banke, jer sam menjala iznos }
-	 */
-	/*
-	 * @Override public Presek obradiZahtevZaIzvod(ZahtevZaIzvod zahtevZaIzvod)
-	 * { int brojStavki=3; //IZ BAZE UZMI SVE NALOGE ZA UPLATU GDE JE BROJ
-	 * RACUNA PRIMAOCA ISTI KAO I BROJ //NA ZAHTEVU ZA IZVOD I GDE JE DATUM ISTI
-	 * KAO ID DATUM NA ZAHTEVU. //NAPRAVILA SAM HASH MAPU U BANCI, SA SVIM
-	 * UPLATAMA, VIDI JE L IMA SMISLA, I AKO JE //OK, ONDA TREBA DODAVATI PO
-	 * KODU U TU HASH MAPU KAD GOD PRIMA ILI SALJE NALOG.->DODALA
-	 * 
-	 * Banka izvodIzBanke=null;//ovde strpaj banku iz baze, po oznaci banke
-	 * String brojRacunaFirme=zahtevZaIzvod.getBrojRacuna(); String
-	 * oznakaBanke=brojRacunaFirme.substring(0, 3);
-	 * 
-	 * ArrayList<Nalog>
-	 * listaNaloga=izvodIzBanke.getUplate().get(zahtevZaIzvod.getBrojRacuna());
-	 * 
-	 * Presek presek=new Presek(); StavkaPreseka stavka;
-	 * 
-	 * int rbrPreseka=zahtevZaIzvod.getRbrPreseka().intValue()-1;
-	 * 
-	 * for(int i=rbrPreseka*brojStavki; i<i+brojStavki; i++){
-	 * if(listaNaloga.size()>=i){ Nalog n=listaNaloga.get(i); stavka= new
-	 * StavkaPreseka(n.getDuznik(),
-	 * n.getSvrhaPlacanja(),n.getPrimalac(),n.getDatumNaloga
-	 * (),n.getDatumValute()
-	 * ,n.getRacunDuznik(),n.getModelZaduzenja(),n.getPozivNaBrZaduzenja
-	 * (),n.getRacunPoverioca
-	 * (),n.getModelOdobrenja(),n.getPozivNaBrOdobrenja(),n.getIznos(),"a");
-	 * presek.getStavkaPreseka().add(stavka); } }
-	 * 
-	 * ZaglavljePreseka zaglavlje= new ZaglavljePreseka();
-	 * zaglavlje.setBrojPreseka(zahtevZaIzvod.getRbrPreseka());
-	 * zaglavlje.setBrojRacuna(zahtevZaIzvod.getBrojRacuna());
-	 * zaglavlje.setDatumNaloga(zahtevZaIzvod.getDatum()); //NE MOGU OVO DA
-	 * SETUJEM STARO I NOVO STANJE, BEZ BANKE???
-	 * 
-	 * presek.setZaglavljePreseka(zaglavlje); return presek; }
-	 */
+	@Override
+	public void primiMt900(Mt900 mt900) {
+		// ISCITAJ BANKU IZvBAZE,PO OBRACUNSKOM RACUNU BANKE DUYNIKA
+		// MOZDA NE TREBA DA SE CITA IZ BANKE NEGO GORE DA SE IZVUCE
+		try {
+			wsdlCB=new URL("http://SarvanLaptop:8083/CentralnaBanka/CentralnaBankaServis?wsdl");
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		System.out.println("-----------------");
+		System.out.println("BANKA PRIMILA MT900");
+		System.out.println("-----------------");
+
+		String upit1 = "for $x in doc('/content/banka.xml')/banke/banka where $x/swiftCode='"
+				+ mt900.getSwiftBanDuznik() + "' return $x";
+		String odgovor1 = posaljiUpit(upit1);
+
+		Banka bankaDuznika = null;
+		try {
+			bankaDuznika = unmarshaluj(Banka.class, new StreamSource(
+					new StringReader(odgovor1)));
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("----------------------");
+		System.out.println("BANKA DUZNIKA U MT900" + bankaDuznika.getNaziv());
+		System.out.println("----------------------");
+
+		// uzmi iz baze nalog po idNaloga
+		String idNaloga = mt900.getIdPorukeNaloga();
+		String upit = "declare namespace nal='http://ftn.uns.ac.rs/nalog';" + "for $x in doc('/content/uplata.xml')/uplate/uplata/nalozi[nal:idPoruke='"
+				+ idNaloga + "'] return $x"; 
+		String odgovor = posaljiUpit(upit);
+
+		Nalog nal = null;
+		try {
+			nal = unmarshaluj(Nalog.class, new StreamSource(new StringReader(
+					odgovor)));
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+
+		String brojRacunaDuznik = nal.getRacunDuznik();
+
+		System.out.println("--------------------");
+		System.out.println("BANKA DUZNIKA PRE NEGO STO JOJ VRATIMO PARE: " + bankaDuznika.getIznosObracunskiRacun());
+		System.out.println("--------------------");
+		
+		// vracam banci rezervisane pare, posto ce CB da skine banci sa racuna
+		// iznos sa naloga.
+
+		BigDecimal noviIznos = bankaDuznika.getIznosObracunskiRacun().add(
+				bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
+						.getRezervisanoStanje());
+		bankaDuznika.setIznosObracunskiRacun(noviIznos);
+		
+		// mislim da treba da se update-uje racun od banke, jer sam menjala
+		// iznos
+		
+		System.out.println("--------------------");
+		System.out.println("BANKA DUZNIKA NAKON STO JOJ VRATIMO PARE: " + bankaDuznika.getIznosObracunskiRacun());
+		System.out.println("--------------------");
+
+		try {
+
+			// UPISIVANJE NOVIH STANJA RACUNA U BAZU
+			String upit3 = "xdmp:node-replace(doc('/content/banka.xml')/banke/banka[oznakaBanke='"
+					+ bankaDuznika.getOznakaBanke()
+					+ "']/iznosObracunskiRacun, <iznosObracunskiRacun> "
+					+ noviIznos + "</iznosObracunskiRacun>);";
+			posaljiUpit(upit3);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		// SAD SKIDAM IZNOS SA RACUNA DUZNIKA TAKO STO MU UZMEM REZERVISANO
+		bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
+				.setRezervisanoStanje(new BigDecimal(0));
+		// UPISI NOVO RACUN IZNOS U BANKUDUYNIKA NA NJEGOVO MESTO U MAPI PO
+		// NJEGOVOM RACUNU
+		
+		System.out.println("--------------------------");
+		System.out.println("VRACAMO REZERVISANO STANJE DUZNIKA NA: " + bankaDuznika.getRacunIznos().get(brojRacunaDuznik).getRezervisanoStanje());
+		System.out.println("--------------------------");
+		try {
+
+			StringWriter sw1 = new StringWriter();
+			marshaluj(bankaDuznika.getRacunIznos().get(nal.getRacunDuznik()),
+					sw1);
+			String kon1 = sw1.toString().substring(
+					sw1.toString().indexOf("raspolozivoStanje") - 1,
+					sw1.toString().indexOf("</racunUBanci>"));
+
+			// UPISIVANJE NOVIH STANJA RACUNA U BAZU
+			String upit3 = "xdmp:node-replace(doc('/content/banka.xml')/banke/banka[oznakaBanke='"
+					+ bankaDuznika.getOznakaBanke()
+					+ "']/racunIznos/entry[key='"
+					+ nal.getRacunDuznik()
+					+ "']/value, <value>" + kon1 + "</value>)";
+			posaljiUpit(upit3);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public void odobriSredstva(Mt103 mt103, Mt910 mt910) {
+		// IZ BAYE UZMI BANKU PO OBRACUNSKOM RACUNU BANKE POVERIOCA IZ MT910
+		try {
+			wsdlCB=new URL("http://SarvanLaptop:8083/CentralnaBanka/CentralnaBankaServis?wsdl");
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		String obracunskiRacBanPoverioca = mt910.getObracunskiRacBanPoverioc();
+		
+		System.out.println("------------------------");
+		System.out.println("USAO U ODOBRi SREDSTVA");
+		System.out.println("------------------------");
+		
+		String upit1 = "for $x in doc('/content/banka.xml')/banke/banka where $x/obracunskiRacun='"
+				+ obracunskiRacBanPoverioca + "' return $x";
+		String odgovor1 = posaljiUpit(upit1);
+
+		Banka bankaPoverioca = null;
+		try {
+			bankaPoverioca = unmarshaluj(Banka.class, new StreamSource(
+					new StringReader(odgovor1)));
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("----------------------");
+		System.out.println("BANKA POVERIOCA " + bankaPoverioca.getNaziv());
+		System.out.println("----------------------");
+
+		System.out.println("-----------------------");
+		System.out.println("POVERIOC PRE PRIMANJA PARA: " + bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca()).getRaspolozivoStanje());
+		System.out.println("-----------------------");
+		BigDecimal noviIznos = bankaPoverioca.getRacunIznos()
+				.get(mt103.getRacunPoverioca()).getRaspolozivoStanje()
+				.add(mt103.getIznos());
+		bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca())
+				.setRaspolozivoStanje(noviIznos);
+		// upisi u bazu racuna u banci
+		System.out.println("-----------------------");
+		System.out.println("POVERIOC POSLE PRIMANJA PARA: " + bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca()).getRaspolozivoStanje());
+		System.out.println("-----------------------");
+
+		try {
+
+			StringWriter sw1 = new StringWriter();
+			marshaluj(
+					bankaPoverioca.getRacunIznos().get(
+							mt103.getRacunPoverioca()), sw1);
+			String kon1 = sw1.toString().substring(
+					sw1.toString().indexOf("raspolozivoStanje") - 1,
+					sw1.toString().indexOf("</racunUBanci>"));
+			
+		
+			
+			// UPISIVANJE NOVIH STANJA RACUNA U BAZU
+			String upit3 = "xdmp:node-replace(doc('/content/banka.xml')/banke/banka[oznakaBanke='"
+					+ bankaPoverioca.getOznakaBanke()
+					+ "']/racunIznos/entry[key='"
+					+ mt103.getRacunPoverioca()
+					+ "']/value, <value>"
+					+ kon1 + "</value>)";
+			
+			posaljiUpit(upit3);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("------------------------------");
+		System.out.println("BANKA sA PARAMA od FIRME: " + bankaPoverioca.getIznosObracunskiRacun());
+		System.out.println("------------------------------");
+		// sad smanjujem pare sa bankinog racuna, posto je druga firma uplatila
+		// na bankin racun
+		BigDecimal noviObracunski = bankaPoverioca.getIznosObracunskiRacun()
+				.subtract(mt103.getIznos());
+		bankaPoverioca.setIznosObracunskiRacun(noviObracunski);
+
+		// mislim da treba da se update-uje racun od banke, jer sam menjala
+		// iznos
+		System.out.println("---------------------");
+		System.out.println("BANKA sA SKINUTIM PARAMA FIRME: " + bankaPoverioca.getIznosObracunskiRacun());
+		System.out.println("------------------------------");
+
+		try {
+
+			// UPISIVANJE NOVIH STANJA RACUNA U BAZU
+			String upit3 = "xdmp:node-replace(doc('/content/banka.xml')/banke/banka[oznakaBanke='"
+					+ bankaPoverioca.getOznakaBanke()
+					+ "']/iznosObracunskiRacun, <iznosObracunskiRacun> "
+					+ noviObracunski + "</iznosObracunskiRacun>);";
+			posaljiUpit(upit3);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public Presek obradiZahtevZaIzvod(ZahtevZaIzvod zahtevZaIzvod) {
+		try {
+			wsdlCB=new URL("http://SarvanLaptop:8083/CentralnaBanka/CentralnaBankaServis?wsdl");
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		int brojStavki = 3;
+		// IZ BAZE UZMI SVE NALOGE ZA UPLATU GDE JE BROJ RACUNA PRIMAOCA ISTI
+		// KAO I BROJ NA ZAHTEVU ZA IZVOD I GDE JE DATUM ISTI
+		// KAO ID DATUM NA ZAHTEVU. //NAPRAVILA SAM HASH MAPU U BANCI, SA SVIM
+		// UPLATAMA, VIDI JE L IMA SMISLA, I AKO JE
+		// OK, ONDA TREBA DODAVATI PO KODU U TU HASH MAPU KAD GOD PRIMA ILI
+		// SALJE NALOG.->DODALA
+
+		String brojRacunaFirme = zahtevZaIzvod.getBrojRacuna();
+		String oznakaBanke = brojRacunaFirme.substring(0, 3);
+
+		String upit1 = "for $x in doc('/content/banka.xml')/banke/banka where $x/oznakaBanke='"
+				+ oznakaBanke + "' return $x";
+		String odgovor1 = posaljiUpit(upit1);
+
+		Banka izvodIzBanke = null;
+		try {
+			izvodIzBanke = unmarshaluj(Banka.class, new StreamSource(
+					new StringReader(odgovor1)));
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("----------------------");
+		System.out.println("BANKA DUZNIKA " + izvodIzBanke.getNaziv());
+		System.out.println("----------------------");
+
+		String upitPre1 = "for $x in doc('/content/uplata.xml')/uplate/uplata[racunPrimaoca='"
+				+ zahtevZaIzvod.getBrojRacuna()
+				+ "']/nalozi[datumNaloga= "
+				+ zahtevZaIzvod.getDatum() + "] return $x";
+		System.out.println("PRE SLANJA");
+		String odgovorUplata = posaljiUpit(upitPre1);
+		System.out.println("POSle slanjaaa");
+		Nalozi listaNaloga = null;
+		
+		if (odgovorUplata == null) {
+
+			// sta ako nema????
+			listaNaloga = new Nalozi();
+			return null;
+
+		} else {
+
+			try {
+				listaNaloga = unmarshaluj(Nalozi.class, new StreamSource(
+						new StringReader(odgovorUplata)));
+			} catch (JAXBException e) {
+				e.printStackTrace();
+			}
+			
+			Presek presek = new Presek();
+			StavkaPreseka stavka;
+
+			int rbrPreseka = zahtevZaIzvod.getRbrPreseka().intValue() - 1;
+
+			for (int i = rbrPreseka * brojStavki; i < i + brojStavki; i++) {
+				if (listaNaloga.getNalozi().size() >= i) {
+					Nalog n = listaNaloga.getNalozi().get(i);
+					stavka = new StavkaPreseka(n.getDuznik(), n.getSvrhaPlacanja(),
+							n.getPrimalac(), n.getDatumNaloga(),
+							n.getDatumValute(), n.getRacunDuznik(),
+							n.getModelZaduzenja(), n.getPozivNaBrZaduzenja(),
+							n.getRacunPoverioca(), n.getModelOdobrenja(),
+							n.getPozivNaBrOdobrenja(), n.getIznos(), "a");
+					presek.getStavkaPreseka().add(stavka);
+				}
+			}
+
+			ZaglavljePreseka zaglavlje = new ZaglavljePreseka();
+			zaglavlje.setBrojPreseka(zahtevZaIzvod.getRbrPreseka());
+			zaglavlje.setBrojRacuna(zahtevZaIzvod.getBrojRacuna());
+			zaglavlje.setDatumNaloga(zahtevZaIzvod.getDatum());
+			// NE MOGU OVO DA SETUJEM STARO I NOVO STANJE, BEZ BANKE???
+			// ??????????????
+
+			presek.setZaglavljePreseka(zaglavlje);
+
+			return presek;
+
+		}
+
+	
+	}
 
 	public String posaljiUpit(String upit) {
 		ServerEvaluationCall poziv = StartApp.getClient().newServerEval();

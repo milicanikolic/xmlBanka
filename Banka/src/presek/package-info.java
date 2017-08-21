@@ -7,3 +7,4 @@
 
 @javax.xml.bind.annotation.XmlSchema(namespace = "http://ftn.uns.ac.rs/presek", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package presek;
+

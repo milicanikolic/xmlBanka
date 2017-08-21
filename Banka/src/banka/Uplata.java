@@ -14,9 +14,6 @@ import nalog.Nalog;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Uplata implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -422459348864485424L;
 	private String racunPrimaoca;
 	private List<Nalog> nalozi;

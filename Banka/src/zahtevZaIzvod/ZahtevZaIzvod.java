@@ -5,10 +5,10 @@
 // Generated on: 2017.08.13 at 06:06:03 PM CEST 
 //
 
-
 package zahtevZaIzvod;
 
 import java.math.BigInteger;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -16,11 +16,13 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-
 /**
- * <p>Java class for zahtevZaIzvod complex type.
+ * <p>
+ * Java class for zahtevZaIzvod complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType name="zahtevZaIzvod">
@@ -45,91 +47,79 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "zahtevZaIzvod", propOrder = {
-    "brojRacuna",
-    "datum",
-    "rbrPreseka"
-})
+@XmlType(name = "zahtevZaIzvod", propOrder = { "brojRacuna", "datum",
+		"rbrPreseka" })
 public class ZahtevZaIzvod {
 
-    @XmlElement(required = true)
-    protected String brojRacuna;
-    @XmlElement(required = true)
-    @XmlSchemaType(name = "date")
-    protected XMLGregorianCalendar datum;
-    @XmlElement(required = true)
-    protected BigInteger rbrPreseka;
+	@XmlElement(required = true)
+	protected String brojRacuna;
+	@XmlElement(required = true)
+	@XmlSchemaType(name = "date")
+	protected XMLGregorianCalendar datum;
+	@XmlElement(required = true)
+	protected BigInteger rbrPreseka;
 
-    /**
-     * Gets the value of the brojRacuna property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getBrojRacuna() {
-        return brojRacuna;
-    }
+	/**
+	 * Gets the value of the brojRacuna property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getBrojRacuna() {
+		return brojRacuna;
+	}
 
-    /**
-     * Sets the value of the brojRacuna property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setBrojRacuna(String value) {
-        this.brojRacuna = value;
-    }
+	/**
+	 * Sets the value of the brojRacuna property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setBrojRacuna(String value) {
+		this.brojRacuna = value;
+	}
 
-    /**
-     * Gets the value of the datum property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public XMLGregorianCalendar getDatum() {
-        return datum;
-    }
+	/**
+	 * Gets the value of the datum property.
+	 * 
+	 * @return possible object is {@link XMLGregorianCalendar }
+	 * 
+	 */
+	public XMLGregorianCalendar getDatum() {
+		return datum;
+	}
 
-    /**
-     * Sets the value of the datum property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public void setDatum(XMLGregorianCalendar value) {
-        this.datum = value;
-    }
+	/**
+	 * Sets the value of the datum property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link XMLGregorianCalendar }
+	 * 
+	 */
+	public void setDatum(XMLGregorianCalendar value) {
+		this.datum = value;
+	}
 
-    /**
-     * Gets the value of the rbrPreseka property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigInteger }
-     *     
-     */
-    public BigInteger getRbrPreseka() {
-        return rbrPreseka;
-    }
+	/**
+	 * Gets the value of the rbrPreseka property.
+	 * 
+	 * @return possible object is {@link BigInteger }
+	 * 
+	 */
+	public BigInteger getRbrPreseka() {
+		return rbrPreseka;
+	}
 
-    /**
-     * Sets the value of the rbrPreseka property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BigInteger }
-     *     
-     */
-    public void setRbrPreseka(BigInteger value) {
-        this.rbrPreseka = value;
-    }
+	/**
+	 * Sets the value of the rbrPreseka property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link BigInteger }
+	 * 
+	 */
+	public void setRbrPreseka(BigInteger value) {
+		this.rbrPreseka = value;
+	}
 
 }

@@ -12,39 +12,38 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Banka implements Serializable {
 
-	/**
-	* 
-	*/
 	private static final long serialVersionUID = 1L;
 
-	private String oznakaBanke;//predstavlja ona prve 3 cifre u racunu firme, po kojima moze da se
-	//vidi u kojoj banci firma ima otvoren racun
+	private String oznakaBanke;// predstavlja ona prve 3 cifre u racunu firme,
+								// po kojima moze da se
+	// vidi u kojoj banci firma ima otvoren racun
 	private String naziv;
 	private String obracunskiRacun;
 	private String swiftCode;
 	private HashMap<String, String> racunFirme;
-	public  HashMap<String,RacunUBanci> racunIznos; //broj racuna firme, iznosi na racunu
-	//private HashMap<String,ArrayList<Nalog>> uplata; //broj racuna firme, lista njenih primljenih i poslatih uplata 
+	public HashMap<String, RacunUBanci> racunIznos; // broj racuna firme, iznosi
+													// na racunu
+
 	private BigDecimal iznosObracunskiRacun;
-	
-	
+
 	public Banka() {
 		super();
 		racunFirme = new HashMap<String, String>();
-		racunIznos= new HashMap<String,RacunUBanci>();
-	
+		racunIznos = new HashMap<String, RacunUBanci>();
+
 	}
 
-	public Banka(String naziv, String oznakaBanke,String obracunskiRacun, String swiftCode, BigDecimal iznosObracunskiRacun) {
+	public Banka(String naziv, String oznakaBanke, String obracunskiRacun,
+			String swiftCode, BigDecimal iznosObracunskiRacun) {
 		super();
 		racunFirme = new HashMap<String, String>();
-		racunIznos= new HashMap<String,RacunUBanci>();
-		
+		racunIznos = new HashMap<String, RacunUBanci>();
+
 		this.naziv = naziv;
-		this.oznakaBanke=oznakaBanke;
+		this.oznakaBanke = oznakaBanke;
 		this.obracunskiRacun = obracunskiRacun;
 		this.swiftCode = swiftCode;
-		this.iznosObracunskiRacun=iznosObracunskiRacun;
+		this.iznosObracunskiRacun = iznosObracunskiRacun;
 	}
 
 	public String getNaziv() {
@@ -71,9 +70,6 @@ public class Banka implements Serializable {
 		this.obracunskiRacun = obracunskiRacun;
 	}
 
-	
-
-
 	public HashMap<String, RacunUBanci> getRacunIznos() {
 		return racunIznos;
 	}
@@ -81,8 +77,6 @@ public class Banka implements Serializable {
 	public void setRacunIznos(HashMap<String, RacunUBanci> racunIznos) {
 		this.racunIznos = racunIznos;
 	}
-
-	
 
 	public String getOznakaBanke() {
 		return oznakaBanke;
@@ -107,16 +101,13 @@ public class Banka implements Serializable {
 	public void setIznosObracunskiRacun(BigDecimal iznosObracunskiRacun) {
 		this.iznosObracunskiRacun = iznosObracunskiRacun;
 	}
-	
-	
+
 	public void dodajRacunFirme(String firma, String brRacuna) {
 		racunFirme.put(firma, brRacuna);
 	}
-	
+
 	public void dodajIznosRacuna(String brRacuna, RacunUBanci racun) {
 		racunIznos.put(brRacuna, racun);
 	}
-	
-	
 
 }

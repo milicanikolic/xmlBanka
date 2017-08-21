@@ -5,10 +5,10 @@
 // Generated on: 2017.08.09 at 11:33:46 PM CEST 
 //
 
-
 package mt910;
 
 import java.math.BigDecimal;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -16,11 +16,13 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-
 /**
- * <p>Java class for mt910 complex type.
+ * <p>
+ * Java class for mt910 complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType name="mt910">
@@ -62,203 +64,181 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "mt910", propOrder = {
-    "idPoruke",
-    "swiftBanPoverioc",
-    "obracunskiRacBanPoverioc",
-    "idPorukeNaloga",
-    "datumValute",
-    "iznos",
-    "sifraValute"
-})
+@XmlType(name = "mt910", propOrder = { "idPoruke", "swiftBanPoverioc",
+		"obracunskiRacBanPoverioc", "idPorukeNaloga", "datumValute", "iznos",
+		"sifraValute" })
 public class Mt910 {
 
-    @XmlElement(required = true)
-    protected String idPoruke;
-    @XmlElement(required = true)
-    protected String swiftBanPoverioc;
-    @XmlElement(required = true)
-    protected String obracunskiRacBanPoverioc;
-    @XmlElement(required = true)
-    protected String idPorukeNaloga;
-    @XmlElement(required = true)
-    @XmlSchemaType(name = "date")
-    protected XMLGregorianCalendar datumValute;
-    @XmlElement(required = true)
-    protected BigDecimal iznos;
-    @XmlElement(required = true)
-    protected String sifraValute;
+	@XmlElement(required = true)
+	protected String idPoruke;
+	@XmlElement(required = true)
+	protected String swiftBanPoverioc;
+	@XmlElement(required = true)
+	protected String obracunskiRacBanPoverioc;
+	@XmlElement(required = true)
+	protected String idPorukeNaloga;
+	@XmlElement(required = true)
+	@XmlSchemaType(name = "date")
+	protected XMLGregorianCalendar datumValute;
+	@XmlElement(required = true)
+	protected BigDecimal iznos;
+	@XmlElement(required = true)
+	protected String sifraValute;
 
-    /**
-     * Gets the value of the idPoruke property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getIdPoruke() {
-        return idPoruke;
-    }
+	/**
+	 * Gets the value of the idPoruke property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getIdPoruke() {
+		return idPoruke;
+	}
 
-    /**
-     * Sets the value of the idPoruke property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setIdPoruke(String value) {
-        this.idPoruke = value;
-    }
+	/**
+	 * Sets the value of the idPoruke property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setIdPoruke(String value) {
+		this.idPoruke = value;
+	}
 
-    /**
-     * Gets the value of the swiftBanPoverioc property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getSwiftBanPoverioc() {
-        return swiftBanPoverioc;
-    }
+	/**
+	 * Gets the value of the swiftBanPoverioc property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getSwiftBanPoverioc() {
+		return swiftBanPoverioc;
+	}
 
-    /**
-     * Sets the value of the swiftBanPoverioc property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setSwiftBanPoverioc(String value) {
-        this.swiftBanPoverioc = value;
-    }
+	/**
+	 * Sets the value of the swiftBanPoverioc property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setSwiftBanPoverioc(String value) {
+		this.swiftBanPoverioc = value;
+	}
 
-    /**
-     * Gets the value of the obracunskiRacBanPoverioc property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getObracunskiRacBanPoverioc() {
-        return obracunskiRacBanPoverioc;
-    }
+	/**
+	 * Gets the value of the obracunskiRacBanPoverioc property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getObracunskiRacBanPoverioc() {
+		return obracunskiRacBanPoverioc;
+	}
 
-    /**
-     * Sets the value of the obracunskiRacBanPoverioc property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setObracunskiRacBanPoverioc(String value) {
-        this.obracunskiRacBanPoverioc = value;
-    }
+	/**
+	 * Sets the value of the obracunskiRacBanPoverioc property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setObracunskiRacBanPoverioc(String value) {
+		this.obracunskiRacBanPoverioc = value;
+	}
 
-    /**
-     * Gets the value of the idPorukeNaloga property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getIdPorukeNaloga() {
-        return idPorukeNaloga;
-    }
+	/**
+	 * Gets the value of the idPorukeNaloga property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getIdPorukeNaloga() {
+		return idPorukeNaloga;
+	}
 
-    /**
-     * Sets the value of the idPorukeNaloga property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setIdPorukeNaloga(String value) {
-        this.idPorukeNaloga = value;
-    }
+	/**
+	 * Sets the value of the idPorukeNaloga property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setIdPorukeNaloga(String value) {
+		this.idPorukeNaloga = value;
+	}
 
-    /**
-     * Gets the value of the datumValute property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public XMLGregorianCalendar getDatumValute() {
-        return datumValute;
-    }
+	/**
+	 * Gets the value of the datumValute property.
+	 * 
+	 * @return possible object is {@link XMLGregorianCalendar }
+	 * 
+	 */
+	public XMLGregorianCalendar getDatumValute() {
+		return datumValute;
+	}
 
-    /**
-     * Sets the value of the datumValute property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public void setDatumValute(XMLGregorianCalendar value) {
-        this.datumValute = value;
-    }
+	/**
+	 * Sets the value of the datumValute property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link XMLGregorianCalendar }
+	 * 
+	 */
+	public void setDatumValute(XMLGregorianCalendar value) {
+		this.datumValute = value;
+	}
 
-    /**
-     * Gets the value of the iznos property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigDecimal }
-     *     
-     */
-    public BigDecimal getIznos() {
-        return iznos;
-    }
+	/**
+	 * Gets the value of the iznos property.
+	 * 
+	 * @return possible object is {@link BigDecimal }
+	 * 
+	 */
+	public BigDecimal getIznos() {
+		return iznos;
+	}
 
-    /**
-     * Sets the value of the iznos property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BigDecimal }
-     *     
-     */
-    public void setIznos(BigDecimal value) {
-        this.iznos = value;
-    }
+	/**
+	 * Sets the value of the iznos property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link BigDecimal }
+	 * 
+	 */
+	public void setIznos(BigDecimal value) {
+		this.iznos = value;
+	}
 
-    /**
-     * Gets the value of the sifraValute property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getSifraValute() {
-        return sifraValute;
-    }
+	/**
+	 * Gets the value of the sifraValute property.
+	 * 
+	 * @return possible object is {@link String }
+	 * 
+	 */
+	public String getSifraValute() {
+		return sifraValute;
+	}
 
-    /**
-     * Sets the value of the sifraValute property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setSifraValute(String value) {
-        this.sifraValute = value;
-    }
-    
-    public String toString(){
-    	return "ID poruke: " + this.idPoruke + ", swift kod banke poverioc:" + this.swiftBanPoverioc + ", obracunski racun banke poverioc: " + this.obracunskiRacBanPoverioc + ", ID poruke naloga: " + this.idPorukeNaloga + ", datum valute" + this.datumValute + ", iznos: " + this.iznos + ", sifra valute: " + this.sifraValute;
-    }
+	/**
+	 * Sets the value of the sifraValute property.
+	 * 
+	 * @param value
+	 *            allowed object is {@link String }
+	 * 
+	 */
+	public void setSifraValute(String value) {
+		this.sifraValute = value;
+	}
+
+	public String toString() {
+		return "ID poruke: " + this.idPoruke + ", swift kod banke poverioc:"
+				+ this.swiftBanPoverioc + ", obracunski racun banke poverioc: "
+				+ this.obracunskiRacBanPoverioc + ", ID poruke naloga: "
+				+ this.idPorukeNaloga + ", datum valute" + this.datumValute
+				+ ", iznos: " + this.iznos + ", sifra valute: "
+				+ this.sifraValute;
+	}
 
 }
