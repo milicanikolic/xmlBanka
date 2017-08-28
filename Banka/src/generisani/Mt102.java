@@ -1,5 +1,5 @@
 
-package rs.ac.uns.ftn.mt102;
+package generisani;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +97,8 @@ public class Mt102 {
         return this.pojedinacnoPlacanjeMt102;
     }
 
-    public void dodajPlacanje(PojedinacnoPlacanjeMt102 pmt102){
-    	pojedinacnoPlacanjeMt102.add(pmt102);
-    }
+	public Mt102() {
+		super();
+	}
+
 }

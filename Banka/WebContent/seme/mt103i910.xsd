@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    targetNamespace="http://ftn.uns.ac.rs/mt103i910" xmlns:mt103="http://ftn.uns.ac.rs/mt103"
+    xmlns:mt910="http://ftn.uns.ac.rs/mt910" xmlns:mts="http://ftn.uns.ac.rs/mt103i910">
+
+    <xs:import namespace="http://ftn.uns.ac.rs/mt103"
+        schemaLocation="file:/D:/FAKS/CETVRTA/XML/Projekat/NAS/githubBanka/xmlbanka/Banka/WebContent/seme/mt103.xsd"/>
+    <xs:import namespace="http://ftn.uns.ac.rs/mt910"
+        schemaLocation="file:/D:/FAKS/CETVRTA/XML/Projekat/NAS/githubBanka/xmlbanka/Banka/WebContent/seme/mt910.xsd"/>
+    <xs:element name="MT103i910">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="mt103n" type="mt103:mt103"/>
+                <xs:element name="mt910n" type="mt910:mt910"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

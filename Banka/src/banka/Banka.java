@@ -14,6 +14,7 @@ public class Banka implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private String port;
 	private String oznakaBanke;// predstavlja ona prve 3 cifre u racunu firme,
 								// po kojima moze da se
 	// vidi u kojoj banci firma ima otvoren racun
@@ -108,6 +109,14 @@ public class Banka implements Serializable {
 
 	public void dodajIznosRacuna(String brRacuna, RacunUBanci racun) {
 		racunIznos.put(brRacuna, racun);
+	}
+
+	public String getPort() {
+		return port;
+	}
+
+	public void setPort(String port) {
+		this.port = port;
 	}
 
 }

@@ -1,5 +1,11 @@
 package app;
 
+import generisani.CentralnaBankaServis;
+import generisani.Mt102;
+import generisani.Mt103;
+import generisani.PojedinacnoPlacanjeMt102;
+import generisani.ZaglavljeMt102;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -18,17 +24,13 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.Service;
 
+import mt103imt910.MT103I910;
 import mt900.Mt900;
 import mt910.Mt910;
 import nalog.Nalog;
 import presek.Presek;
 import presek.StavkaPreseka;
 import presek.ZaglavljePreseka;
-import rs.ac.uns.ftn.cb.CentralnaBankaServis;
-import rs.ac.uns.ftn.mt102.Mt102;
-import rs.ac.uns.ftn.mt102.PojedinacnoPlacanjeMt102;
-import rs.ac.uns.ftn.mt102.ZaglavljeMt102;
-import rs.ac.uns.ftn.mt103.Mt103;
 import wrapper.Nalozi;
 import zahtevZaIzvod.ZahtevZaIzvod;
 import banka.Banka;
@@ -52,7 +54,7 @@ public class BankaServisImpl implements BankaServis {
 		System.out.println("MILICEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
 		
 		try {
-			wsdlCB=new URL("http://SarvanLaptop:8083/CentralnaBanka/CentralnaBankaServis?wsdl");
+			wsdlCB=new URL("http://SarvanLaptop:1080/CentralnaBanka/CentralnaBankaServis?wsdl");//StartApp.getWsdlCB());
 		} catch (MalformedURLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -273,12 +275,15 @@ public class BankaServisImpl implements BankaServis {
 				mt103.setModelZaduzenja(nalog.getModelZaduzenja());
 				mt103.setObracunskiRacBankeDuznik(bankaDuznika
 						.getObracunskiRacun());
-		//		mt103.setObracunskiRacunBankePoverioca(bankaPrimaoca.getObracunskiRacun());
+				mt103.setObracunskiRacunBankePoverioca(bankaPrimaoca.getObracunskiRacun());
 				mt103.setPozivNaBrOdobrenja(nalog.getPozivNaBrOdobrenja());
 				mt103.setPozivNaBrojZaduzenja(nalog.getPozivNaBrZaduzenja());
 				mt103.setPrimalac(nalog.getPrimalac());
 				mt103.setRacunDuznik(nalog.getRacunDuznik());
+				System.out.println("*********************************************************");
+				System.out.println("nalog racun poverioca " + nalog.getRacunPoverioca());
 				mt103.setRacunPoverioca(nalog.getRacunPoverioca());
+				System.out.println("mt103 racun poverioca " + mt103.getRacunPoverioca());
 				mt103.setSifraValute(nalog.getOznakaValute());
 				mt103.setSvrhaPlacanja(nalog.getSvrhaPlacanja());
 				mt103.setSwiftBanDuznik(bankaDuznika.getSwiftCode());
@@ -289,13 +294,15 @@ public class BankaServisImpl implements BankaServis {
 					StringWriter sw = new StringWriter();
 					marshaluj(mt103, sw);
 					String kon = sw.toString().substring(
-							sw.toString().indexOf("mt103") - 1,
+							sw.toString().indexOf("mt103") -1,
 							sw.toString().length());
 					String upit = "declare namespace mt103='http://ftn.uns.ac.rs/mt103';"
 							+ " xdmp:node-insert-child(doc('/content/mt103.xml')/mt103:mt103S,"
 							+ kon + ");";
-					posaljiUpit(upit);
+					System.out.println(sw.toString());
 					System.out.println(kon.toString());
+					posaljiUpit(upit);
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -347,19 +354,27 @@ public class BankaServisImpl implements BankaServis {
 						System.out.println("marsalovanje uplata " + kon);
 						String upit = "xdmp:node-replace(doc('/content/uplata.xml')/uplate/uplata[racunPrimaoca='"
 								+ nalog.getRacunPoverioca() + "']," + kon + ")";
+						System.out.println("pre upita u bazu");
 						posaljiUpit(upit);
+						System.out.println("posle upita u bazu");
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 
+				System.out.println("pre pozivanja centralneeeeeeeeee");
 				// TREBA DA SE POSALJE MT103 CENTRALNOJ BANCI
+				System.out.println("wsdl: "+wsdlCB+" serviceName: "+serviceNameCB);
 				
 				Service service = Service.create(wsdlCB, serviceNameCB);
 			      CentralnaBankaServis inter = service
 			               .getPort(portNameCB, CentralnaBankaServis.class);
 
+			      System.out.println("uzeo je centralnu banku");
+			      
 			       inter.primiMt103(mt103);
+			       
+			       System.out.println("pozvao metodu primi mt103");
 
 			} else if (broj < 0) {
 				// CLEARING AND SETTLEMENT
@@ -524,7 +539,7 @@ public class BankaServisImpl implements BankaServis {
 								nalog.getPozivNaBrOdobrenja(),
 								nalog.getIznos(), nalog.getOznakaValute());
 						// mt102.getPojedinacnoPlacanjeMt102().add(pojedinacnoMt2);
-						mt102.dodajPlacanje(pojedinacnoMt2);
+						mt102.getPojedinacnoPlacanjeMt102().add(pojedinacnoMt2);
 						System.out.println("Dodao pojedinacno,sa ima "
 								+ mt102.getPojedinacnoPlacanjeMt102().size());
 						if (mt102.getPojedinacnoPlacanjeMt102().size() == 3) {
@@ -627,7 +642,7 @@ public class BankaServisImpl implements BankaServis {
 		// ISCITAJ BANKU IZvBAZE,PO OBRACUNSKOM RACUNU BANKE DUYNIKA
 		// MOZDA NE TREBA DA SE CITA IZ BANKE NEGO GORE DA SE IZVUCE
 		try {
-			wsdlCB=new URL("http://SarvanLaptop:8083/CentralnaBanka/CentralnaBankaServis?wsdl");
+			wsdlCB=new URL("http://SarvanLaptop:1080/CentralnaBanka/CentralnaBankaServis?wsdl");//StartApp.getWsdlCB());
 		} catch (MalformedURLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -732,15 +747,48 @@ public class BankaServisImpl implements BankaServis {
 	}
 
 	@Override
-	public void odobriSredstva(Mt103 mt103, Mt910 mt910) {
+	public void odobriSredstva(MT103I910 MT103I910) {
 		// IZ BAYE UZMI BANKU PO OBRACUNSKOM RACUNU BANKE POVERIOCA IZ MT910
+		Mt103 mt103=MT103I910.getMt103N();
+		Mt910 mt910=MT103I910.getMt910N();
+		
+	/*	generisani.Mt103 saljiMt103=new generisani.Mt103();
+		saljiMt103.setIdPoruke(mt103.getIdPoruke());
+		saljiMt103.setSwiftBanDuznik(mt103.getSwiftBanDuznik());
+		saljiMt103.setObracunskiRacBankeDuznik(mt103.getObracunskiRacBankeDuznik());
+		saljiMt103.setSwiftBanPoverioc(mt103.getSwiftBanPoverioc());
+		saljiMt103.setObracunskiRacunBankePoverioca(mt103.getObracunskiRacunBankePoverioca());
+		saljiMt103.setDuznik(mt103.getDuznik());
+		saljiMt103.setSvrhaPlacanja(mt103.getSvrhaPlacanja());
+		saljiMt103.setPrimalac(mt103.getPrimalac());
+		saljiMt103.setDatumNaloga(mt103.getDatumNaloga());
+		saljiMt103.setDatumValute(mt103.getDatumValute());
+		saljiMt103.setRacunDuznik(mt103.getRacunDuznik());
+		saljiMt103.setModelZaduzenja(mt103.getModelZaduzenja());
+		saljiMt103.setPozivNaBrojZaduzenja(mt103.getPozivNaBrojZaduzenja());
+		saljiMt103.setRacunPoverioca(mt103.getRacunPoverioca());
+		saljiMt103.setModelOdobrenja(mt103.getModelOdobrenja());
+		saljiMt103.setPozivNaBrOdobrenja(mt103.getPozivNaBrOdobrenja());
+		saljiMt103.setIznos(mt103.getIznos());
+		saljiMt103.setSifraValute(mt103.getSifraValute());
+		*/
 		try {
-			wsdlCB=new URL("http://SarvanLaptop:8083/CentralnaBanka/CentralnaBankaServis?wsdl");
+			wsdlCB=new URL("http://SarvanLaptop:1080/CentralnaBanka/CentralnaBankaServis?wsdl");//StartApp.getWsdlCB());
 		} catch (MalformedURLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		System.out.println("************MT103******************");
+		if(mt103==null){
+			System.out.println("NULL JEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+		}
+		System.out.println("stvari u mt103: "+mt103.getDuznik()+", "+mt103.getIdPoruke()+", "+mt103.getObracunskiRacBankeDuznik()+", "+mt103.getObracunskiRacunBankePoverioca()
+				+", "+mt103.getPozivNaBrOdobrenja()+", "+mt103.getPozivNaBrojZaduzenja()+", "+mt103.getPrimalac()+", "+mt103.getRacunDuznik()
+				+", "+mt103.getRacunPoverioca()+", "+mt103.getSifraValute()+", "+mt103.getSvrhaPlacanja()+", "+mt103.getSwiftBanPoverioc());
 		
+		System.out.println("---------------ODOBRI STREDSTVA------------");
+		System.out.println("u odobri sredstva mt910 " + mt910.getIdPorukeNaloga());
+		System.out.println("mt910 banka poverioca " + mt910.getSwiftBanPoverioc() + " " + mt910.getObracunskiRacBanPoverioc());
 		String obracunskiRacBanPoverioca = mt910.getObracunskiRacBanPoverioc();
 		
 		System.out.println("------------------------");
@@ -764,6 +812,12 @@ public class BankaServisImpl implements BankaServis {
 		System.out.println("----------------------");
 
 		System.out.println("-----------------------");
+		System.out.println("racun poverioca: "+mt103.getRacunPoverioca());
+		for(String h:bankaPoverioca.getRacunIznos().keySet()){
+			System.out.println("key: "+h);
+			System.out.println("raspolozivo: "+bankaPoverioca.getRacunIznos().get(h).getRaspolozivoStanje());
+			System.out.println("rezervisano: "+bankaPoverioca.getRacunIznos().get(h).getRezervisanoStanje());
+		}
 		System.out.println("POVERIOC PRE PRIMANJA PARA: " + bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca()).getRaspolozivoStanje());
 		System.out.println("-----------------------");
 		BigDecimal noviIznos = bankaPoverioca.getRacunIznos()
@@ -833,7 +887,7 @@ public class BankaServisImpl implements BankaServis {
 	@Override
 	public Presek obradiZahtevZaIzvod(ZahtevZaIzvod zahtevZaIzvod) {
 		try {
-			wsdlCB=new URL("http://SarvanLaptop:8083/CentralnaBanka/CentralnaBankaServis?wsdl");
+			wsdlCB=new URL("http://SarvanLaptop:1080/CentralnaBanka/CentralnaBankaServis?wsdl");//StartApp.getWsdlCB());
 		} catch (MalformedURLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

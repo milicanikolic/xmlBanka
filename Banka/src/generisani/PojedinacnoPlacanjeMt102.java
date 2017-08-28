@@ -1,5 +1,5 @@
 
-package rs.ac.uns.ftn.mt102;
+package generisani;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -427,4 +427,5 @@ public class PojedinacnoPlacanjeMt102 {
 		super();
 	}
 
+    
 }

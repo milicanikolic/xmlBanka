@@ -1,5 +1,5 @@
 
-package rs.ac.uns.ftn.mt103;
+package generisani;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -23,23 +23,24 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="idPoruke" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="swiftBanDuznik" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="obracunskiRacBankeDuznik" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="swiftBanPoverioc" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="duznik" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="svrhaPlacanja" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="primalac" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="datumNaloga" type="{http://www.w3.org/2001/XMLSchema}date"/>
- *         &lt;element name="datumValute" type="{http://www.w3.org/2001/XMLSchema}date"/>
- *         &lt;element name="racunDuznik" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="modelZaduzenja" type="{http://www.w3.org/2001/XMLSchema}integer"/>
- *         &lt;element name="pozivNaBrojZaduzenja" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="racunPoverioca" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="modelOdobrenja" type="{http://www.w3.org/2001/XMLSchema}integer"/>
- *         &lt;element name="pozivNaBrOdobrenja" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="iznos" type="{http://www.w3.org/2001/XMLSchema}decimal"/>
- *         &lt;element name="sifraValute" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="idPoruke" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="swiftBanDuznik" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="obracunskiRacBankeDuznik" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="obracunskiRacunBankePoverioca" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="swiftBanPoverioc" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="duznik" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="svrhaPlacanja" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="primalac" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="datumNaloga" type="{http://www.w3.org/2001/XMLSchema}date" form="qualified"/>
+ *         &lt;element name="datumValute" type="{http://www.w3.org/2001/XMLSchema}date" form="qualified"/>
+ *         &lt;element name="racunDuznik" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="modelZaduzenja" type="{http://www.w3.org/2001/XMLSchema}integer" form="qualified"/>
+ *         &lt;element name="pozivNaBrojZaduzenja" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="racunPoverioca" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="modelOdobrenja" type="{http://www.w3.org/2001/XMLSchema}integer" form="qualified"/>
+ *         &lt;element name="pozivNaBrOdobrenja" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
+ *         &lt;element name="iznos" type="{http://www.w3.org/2001/XMLSchema}decimal" form="qualified"/>
+ *         &lt;element name="sifraValute" type="{http://www.w3.org/2001/XMLSchema}string" form="qualified"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -48,13 +49,13 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  * 
  */
-
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "mt103", propOrder = {
+@XmlType(name = "mt103", namespace = "http://ftn.uns.ac.rs/mt103", propOrder = {
     "idPoruke",
     "swiftBanDuznik",
     "obracunskiRacBankeDuznik",
+    "obracunskiRacunBankePoverioca",
     "swiftBanPoverioc",
     "duznik",
     "svrhaPlacanja",
@@ -78,6 +79,8 @@ public class Mt103 {
     protected String swiftBanDuznik;
     @XmlElement(required = true)
     protected String obracunskiRacBankeDuznik;
+    @XmlElement(required = true)
+    protected String obracunskiRacunBankePoverioca;
     @XmlElement(required = true)
     protected String swiftBanPoverioc;
     @XmlElement(required = true)
@@ -179,6 +182,30 @@ public class Mt103 {
      */
     public void setObracunskiRacBankeDuznik(String value) {
         this.obracunskiRacBankeDuznik = value;
+    }
+
+    /**
+     * Gets the value of the obracunskiRacunBankePoverioca property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getObracunskiRacunBankePoverioca() {
+        return obracunskiRacunBankePoverioca;
+    }
+
+    /**
+     * Sets the value of the obracunskiRacunBankePoverioca property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setObracunskiRacunBankePoverioca(String value) {
+        this.obracunskiRacunBankePoverioca = value;
     }
 
     /**
@@ -516,5 +543,9 @@ public class Mt103 {
     public void setSifraValute(String value) {
         this.sifraValute = value;
     }
+
+	public Mt103() {
+		super();
+	}
 
 }

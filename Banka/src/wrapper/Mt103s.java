@@ -1,5 +1,7 @@
 package wrapper;
 
+import generisani.Mt103;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +9,6 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import rs.ac.uns.ftn.mt103.Mt103;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)

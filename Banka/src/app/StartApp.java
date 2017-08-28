@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -21,7 +22,7 @@ public class StartApp {
 
 	private static DatabaseClient client;
 	private static String trenutniPort;
-	private static HashMap<String, String> portWsdl;
+	private static String wsdlCB;
 
 	public StartApp() {
 
@@ -37,25 +38,21 @@ public class StartApp {
 	}
 	
 	public void procitajProperties(){
-		portWsdl=new HashMap<>();
 		
-		Properties prop=new Properties();
+	/*	Properties prop=new Properties();
 		ClassLoader loader=Thread.currentThread().getContextClassLoader();
 		InputStream input=null;
 		try{
 			input=loader.getResourceAsStream("config.properties");
 			prop.load(input);
-			Set<Object> keys=prop.keySet();
-			for(Object ob:keys){
-				portWsdl.put(ob.toString(), prop.getProperty(ob.toString()));
-			}
+			wsdlCB=prop.getProperty("wsdl");
 		}catch(IOException e){
 			e.printStackTrace();
 		}
-		System.out.println("MAPA WSDL");
-		for(String s:portWsdl.keySet()){
-			System.out.println(s+" : "+portWsdl.get(s));
-		}
+		System.out.println("WSDL Centralne Bankee: "+wsdlCB);
+		*/
+		wsdlCB=ResourceBundle.getBundle("config").getString("wsdl");
+		System.out.println("WSDL Centralne Bankee: "+wsdlCB);
 	}
 
 	/*
@@ -129,7 +126,7 @@ public class StartApp {
 	}
 
 	public static void otvoriKonekciju() {
-		client = DatabaseClientFactory.newClient("laptop-234234", 8003, "admin",
+		client = DatabaseClientFactory.newClient("sarvanlaptop", 8003, "admin",
 				"admin", Authentication.DIGEST);
 
 	}
@@ -153,4 +150,13 @@ public class StartApp {
 	public static void setTrenutniPort(String trenutniPort) {
 		StartApp.trenutniPort = trenutniPort;
 	}
+
+	public static String getWsdlCB() {
+		return wsdlCB;
+	}
+
+	public static void setWsdlCB(String wsdlCB) {
+		StartApp.wsdlCB = wsdlCB;
+	}
+	
 }

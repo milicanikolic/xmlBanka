@@ -1,7 +1,8 @@
 
-package rs.ac.uns.ftn.mt102;
+package generisani;
 
 import java.math.BigDecimal;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -287,5 +288,27 @@ public class ZaglavljeMt102 {
     public void setDatum(XMLGregorianCalendar value) {
         this.datum = value;
     }
+
+	public ZaglavljeMt102(String idPoruke, String swiftBankaDuznik,
+			String obracunskiRacBanDuznik, String swiftBankaPoverioc,
+			String obracunskiRacunBanPoverioc, BigDecimal ukupanIznos,
+			String sifraValute, XMLGregorianCalendar datumValute,
+			XMLGregorianCalendar datum) {
+		super();
+		this.idPoruke = idPoruke;
+		this.swiftBankaDuznik = swiftBankaDuznik;
+		this.obracunskiRacBanDuznik = obracunskiRacBanDuznik;
+		this.swiftBankaPoverioc = swiftBankaPoverioc;
+		this.obracunskiRacunBanPoverioc = obracunskiRacunBanPoverioc;
+		this.ukupanIznos = ukupanIznos;
+		this.sifraValute = sifraValute;
+		this.datumValute = datumValute;
+		this.datum = datum;
+	}
+
+	public ZaglavljeMt102() {
+		super();
+	}
+    
 
 }
