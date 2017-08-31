@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 
+import mt102imt910.MT102I910;
 import mt103imt910.MT103I910;
 import mt900.Mt900;
 import nalog.Nalog;
@@ -37,6 +38,11 @@ public interface BankaServis {
 	public void odobriSredstva(@WebParam(name="MT103i910",targetNamespace="http://ftn.uns.ac.rs/mt103i910") MT103I910 MT103I910);
 	//public void odobriSredstva(@WebParam(name="mt103", targetNamespace="http://ftn.uns.ac.rs/mt103i910") Mt103 mt103, @WebParam(name="mt910", targetNamespace="http://ftn.uns.ac.rs/mt103i910") Mt910 mt910);
 
+	
+	@RequestWrapper(className="nalog.data.Mt102I910Requet")
+	public void primiMt102i910(@WebParam(name="MT102i910",targetNamespace="http://ftn.uns.ac.rs/mt102i910") MT102I910 MT102I910);
+	
+	
 	@RequestWrapper(className = "nalog.data.ZahtevZaIzvodRequest")
 	@ResponseWrapper(className = "nalog.data.ZahtevZaIzvodResponse")
 	public Presek obradiZahtevZaIzvod(

@@ -24,6 +24,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.Service;
 
+import mt102imt910.MT102I910;
 import mt103imt910.MT103I910;
 import mt900.Mt900;
 import mt910.Mt910;
@@ -34,6 +35,7 @@ import presek.ZaglavljePreseka;
 import wrapper.Nalozi;
 import zahtevZaIzvod.ZahtevZaIzvod;
 import banka.Banka;
+import banka.RacunUBanci;
 import banka.Uplata;
 
 import com.marklogic.client.eval.ServerEvaluationCall;
@@ -400,6 +402,7 @@ public class BankaServisImpl implements BankaServis {
 										.getRaspolozivoStanje()
 										.subtract(nalog.getIznos()));
 
+		
 				// CUANJE NOVOG STANJA RACUN IZVNOS U BANCI DUZNIKA
 
 				try {
@@ -424,7 +427,7 @@ public class BankaServisImpl implements BankaServis {
 					e.printStackTrace();
 				}
 
-				// iscitati sve mt102 (ako je ista banka duznika tada proveravam
+				// iscitati sve mt102 (ako je ista banka duznika tada proveravam ??????????????
 				// koliko placanja ima toj mt102 ako ih ima 3 treba da se
 				// posalje taj mt102
 				// i da se izbrise iz baze, ako ih nema 3 napravis novo 102
@@ -433,8 +436,8 @@ public class BankaServisImpl implements BankaServis {
 				// i brises ako nema upises ceo mt u bazu)
 
 				String upitPre = "declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
-						+ " for $x in doc('/content/mt102.xml')/mt102:mt102S/mt102:mt102[mt102:zaglavljeMt102/mt102:swiftBankaDuznik='"
-						+ bankaDuznika.getSwiftCode() + "'] return $x";
+						+ " for $x in doc('/content/mt102.xml')/mt102:mt102S/mt102:mt102[mt102:zaglavljeMt102/mt102:swiftBankaPoverioc='"
+						+ bankaPrimaoca.getSwiftCode() + "'] return $x";
 
 				String odgovor = posaljiUpit(upitPre);
 				if (odgovor == null) {
@@ -883,6 +886,59 @@ public class BankaServisImpl implements BankaServis {
 		}
 
 	}
+	@Override
+	public void primiMt102i910(MT102I910 MT102I910) {
+		
+		System.out.println("*****************BANKA******************");
+		System.out.println("Metoda: Primi MT102 i MT910");
+		
+		Mt102 mt102=MT102I910.getMt102N();
+		Mt910 mt910=MT102I910.getMt910N();
+		
+		Banka bankaPoverioca=null;
+		
+		String upit1 = "for $x in doc('/content/banka.xml')/banke/banka where $x/obracunskiRacun='"
+				+ mt102.getZaglavljeMt102().getObracunskiRacunBanPoverioc() + "' return $x";
+		String odgovor1 = posaljiUpit(upit1);
+
+		try {
+			bankaPoverioca = unmarshaluj(Banka.class, new StreamSource(
+					new StringReader(odgovor1)));
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+		
+		for(PojedinacnoPlacanjeMt102 pojedinacno:mt102.getPojedinacnoPlacanjeMt102()){
+			System.out.println("Skida se sa obracunskog racuna banke: "+bankaPoverioca.getNaziv()+" ,iznos: "+pojedinacno.getIznos());
+			bankaPoverioca.setIznosObracunskiRacun(bankaPoverioca.getIznosObracunskiRacun().subtract(pojedinacno.getIznos()));
+			
+			
+			System.out.println("Firmi: "+bankaPoverioca.getRacunFirme().get(pojedinacno.getPrimalac())+" se dodaje: "+pojedinacno.getIznos());
+			String racunFirmePrimaoca=bankaPoverioca.getRacunFirme().get(pojedinacno.getPrimalac());
+			bankaPoverioca.getRacunIznos().get(racunFirmePrimaoca).setRaspolozivoStanje(bankaPoverioca.getRacunIznos().get(racunFirmePrimaoca).getRaspolozivoStanje().add(pojedinacno.getIznos()));
+		}
+		System.out.println("Iznos obracunskog racuna banke primaoca je: "+bankaPoverioca.getIznosObracunskiRacun());
+		
+		try {
+			StringWriter sw2 = new StringWriter();
+			marshaluj(bankaPoverioca, sw2);
+			String kon2 = sw2.toString().substring(
+					sw2.toString().indexOf("banka") - 1,
+					sw2.toString().length());
+
+			String upit4 = "xdmp:node-replace(doc('/content/banka.xml')/banke/banka[oznakaBanke='"
+					+ bankaPoverioca.getOznakaBanke()
+					+ "', <banka>"
+					+ kon2 + "</banka>)";
+			System.out.println(kon2);
+			System.out.println(upit4);
+			System.out.println("Banka primaoca upisana u bazu");
+			posaljiUpit(upit4);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
 
 	@Override
 	public Presek obradiZahtevZaIzvod(ZahtevZaIzvod zahtevZaIzvod) {
@@ -994,4 +1050,6 @@ public class BankaServisImpl implements BankaServis {
 		Marshaller m = ctx.createMarshaller();
 		m.marshal(obj, wr);
 	}
+
+
 }
