@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.UUID;
 
 import javax.jws.WebService;
+import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -377,7 +378,13 @@ public class BankaServisImpl implements BankaServis {
 										.getRaspolozivoStanje()
 										.subtract(nalog.getIznos()));
 
-		
+				System.out.println("----------------------");
+				System.out.println("firma: "+nalog.getDuznik());
+				System.out.println("raspolozivo stanje: " + bankaDuznika.getRacunIznos().get(nalog.getRacunDuznik()).getRaspolozivoStanje());
+				System.out.println("rezervisano stanje: " + bankaDuznika.getRacunIznos().get(nalog.getRacunDuznik()).getRezervisanoStanje());
+				System.out.println("----------------------");
+
+				
 				// CUANJE NOVOG STANJA RACUN IZVNOS U BANCI DUZNIKA
 
 				try {
@@ -416,7 +423,7 @@ public class BankaServisImpl implements BankaServis {
 
 				String odgovor = posaljiUpit(upitPre);
 				if (odgovor == null) {
-					System.out.println("nema nijedan mt102, pravi ceo nov");
+					System.out.println("NEMA UPLATA ZA TU FIRMU KREIRA SE NOVA MT102");
 					// ne postoji, radi sta treba
 					// napravi sve
 
@@ -473,7 +480,7 @@ public class BankaServisImpl implements BankaServis {
 								+ " xdmp:node-insert-child(doc('/content/mt102.xml')/mt102:mt102S,"
 								+ kon + ");";
 						posaljiUpit(upit);
-						System.out.println(kon.toString());
+					
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -482,13 +489,12 @@ public class BankaServisImpl implements BankaServis {
 
 				else {
 					// vratio mi je taj MT102
-
+					System.out.println("POSTOJI MT102 ZA TU BANKU");
 					Mt102 mt102 = null;
 					try {
 						mt102 = unmarshaluj(Mt102.class, new StreamSource(
 								new StringReader(odgovor)));
-						System.out
-								.println("postoji takav mt i vratio ga je sa racunom poverioca ");
+						
 					} catch (JAXBException e) {
 						e.printStackTrace();
 					}
@@ -496,8 +502,15 @@ public class BankaServisImpl implements BankaServis {
 					if (mt102.getPojedinacnoPlacanjeMt102().size() == 3) {
 						// poslati mt102
 						System.out
-								.println("Nasao MT102 i on ima tri pojedinacna u sebi");
+								.println("MT102 ima tri pojedinacna placanja");
 
+						Service service = Service.create(wsdlCB, serviceNameCB);
+					      CentralnaBankaServis inter = service
+					               .getPort(portNameCB, CentralnaBankaServis.class);
+					      inter.primiMt102(mt102);
+					      
+					      System.out.println("------------POSLATA MT102 CENTRALNOJ BANCI------------");
+					      
 						String upit = "declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
 								+ " xdmp:node-delete(doc('/content/mt102.xml')/mt102:mt102S/mt102:mt102[mt102:zaglavljeMt102/mt102:idPoruke='"
 								+ mt102.getZaglavljeMt102().getIdPoruke()
@@ -506,7 +519,7 @@ public class BankaServisImpl implements BankaServis {
 
 					} else {
 						System.out
-								.println("Nasao MT102 i ina razlicito od 3 pojedinacnih");
+								.println("Nasao MT102, nema dovoljno pojedinacnih placanja");
 						PojedinacnoPlacanjeMt102 pojedinacnoMt2 = new PojedinacnoPlacanjeMt102(
 								nalog.getIdPoruke(), nalog.getDuznik(),
 								nalog.getSvrhaPlacanja(), nalog.getPrimalac(),
@@ -518,11 +531,15 @@ public class BankaServisImpl implements BankaServis {
 								nalog.getIznos(), nalog.getOznakaValute());
 						// mt102.getPojedinacnoPlacanjeMt102().add(pojedinacnoMt2);
 						mt102.getPojedinacnoPlacanjeMt102().add(pojedinacnoMt2);
-						System.out.println("Dodao pojedinacno,sa ima "
-								+ mt102.getPojedinacnoPlacanjeMt102().size());
+						
 						if (mt102.getPojedinacnoPlacanjeMt102().size() == 3) {
 							// poslati mt102
-							System.out.println("treba da briseee");
+							Service service = Service.create(wsdlCB, serviceNameCB);
+						      CentralnaBankaServis inter = service
+						               .getPort(portNameCB, CentralnaBankaServis.class);
+						      inter.primiMt102(mt102);
+						      
+						      System.out.println("------------POSLATA MT102 CENTRALNOJ BANCI------------");
 							String upit = "declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
 									+ "xdmp:node-delete(doc('/content/mt102.xml')/mt102:mt102S/mt102:mt102[mt102:zaglavljeMt102/mt102:idPoruke='"
 									+ mt102.getZaglavljeMt102().getIdPoruke()
@@ -530,8 +547,7 @@ public class BankaServisImpl implements BankaServis {
 							posaljiUpit(upit);
 
 						} else {
-							System.out
-									.println("I dalje nema tri sad cuva MT102 u bazu");
+						
 							try {
 								StringWriter sw = new StringWriter();
 								marshaluj(mt102, sw);
@@ -545,7 +561,7 @@ public class BankaServisImpl implements BankaServis {
 										+ "'],"
 										+ kon
 										+ ")";
-								System.out.println(kon);
+								
 								posaljiUpit(upit);
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -573,11 +589,11 @@ public class BankaServisImpl implements BankaServis {
 						String kon = sw.toString().substring(
 								sw.toString().indexOf("uplata") - 1,
 								sw.toString().length());
-						System.out.println("kon " + kon);
+					
 						String upit = "xdmp:node-insert-child(doc('/content/uplata.xml')/uplate,"
 								+ kon + ");";
 						posaljiUpit(upit);
-						System.out.println(kon.toString());
+						
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -588,10 +604,8 @@ public class BankaServisImpl implements BankaServis {
 					try {
 						uplata = unmarshaluj(Uplata.class, new StreamSource(
 								new StringReader(odgovorUplata)));
-						System.out.println("uplata racun primaoca "
-								+ uplata.getRacunPrimaoca());
+						
 						uplata.dodajNalog(nalog);
-						System.out.println("size " + uplata.getNalozi().size());
 						// sacuva se nova uplata
 
 						StringWriter sw = new StringWriter();
@@ -599,7 +613,7 @@ public class BankaServisImpl implements BankaServis {
 						String kon = sw.toString().substring(
 								sw.toString().indexOf("uplata") - 1,
 								sw.toString().length());
-						System.out.println("marsalovanje uplata " + kon);
+						
 						String upit = "xdmp:node-replace(doc('/content/uplata.xml')/uplate/uplata[racunPrimaoca='"
 								+ nalog.getRacunPoverioca() + "']," + kon + ")";
 						posaljiUpit(upit);
@@ -612,7 +626,7 @@ public class BankaServisImpl implements BankaServis {
 			}
 
 		}
-		return "Evo ti glupi string";
+		return Status.OK.toString();
 	}
 
 	@Override
@@ -620,7 +634,7 @@ public class BankaServisImpl implements BankaServis {
 		// ISCITAJ BANKU IZvBAZE,PO OBRACUNSKOM RACUNU BANKE DUYNIKA
 		// MOZDA NE TREBA DA SE CITA IZ BANKE NEGO GORE DA SE IZVUCE
 		try {
-			wsdlCB=new URL("http://SarvanLaptop:1080/CentralnaBanka/CentralnaBankaServis?wsdl");//StartApp.getWsdlCB());
+			wsdlCB=new URL(StartApp.getWsdlCB());
 		} catch (MalformedURLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -643,8 +657,8 @@ public class BankaServisImpl implements BankaServis {
 		}
 
 		System.out.println("----------------------");
-		System.out.println("BANKA DUZNIKA U MT900" + bankaDuznika.getNaziv());
-		System.out.println("----------------------");
+		System.out.println("BANKA DUZNIKA:" + bankaDuznika.getNaziv());
+
 
 		// uzmi iz baze nalog po idNaloga
 		String idNaloga = mt900.getIdPorukeNaloga();
@@ -662,9 +676,9 @@ public class BankaServisImpl implements BankaServis {
 
 		String brojRacunaDuznik = nal.getRacunDuznik();
 
-		System.out.println("--------------------");
-		System.out.println("BANKA DUZNIKA PRE NEGO STO JOJ VRATIMO PARE: " + bankaDuznika.getIznosObracunskiRacun());
-		System.out.println("--------------------");
+	
+		System.out.println("OBRACUNSKI RACUN BANKE DUZNIKA PRE VRACANJA PARA: " + bankaDuznika.getIznosObracunskiRacun());
+
 		
 		// vracam banci rezervisane pare, posto ce CB da skine banci sa racuna
 		// iznos sa naloga.
@@ -677,8 +691,8 @@ public class BankaServisImpl implements BankaServis {
 		// mislim da treba da se update-uje racun od banke, jer sam menjala
 		// iznos
 		
-		System.out.println("--------------------");
-		System.out.println("BANKA DUZNIKA NAKON STO JOJ VRATIMO PARE: " + bankaDuznika.getIznosObracunskiRacun());
+	
+		System.out.println("OBRACUNSKI RACUN BANKE DUZNIKA NAKON VRACANJA PARA: " + bankaDuznika.getIznosObracunskiRacun());
 		System.out.println("--------------------");
 
 		try {
@@ -698,11 +712,13 @@ public class BankaServisImpl implements BankaServis {
 				.setRezervisanoStanje(new BigDecimal(0));
 		// UPISI NOVO RACUN IZNOS U BANKUDUYNIKA NA NJEGOVO MESTO U MAPI PO
 		// NJEGOVOM RACUNU
-		
-		System.out.println("--------------------------");
-		System.out.println("VRACAMO REZERVISANO STANJE DUZNIKA NA: " + bankaDuznika.getRacunIznos().get(brojRacunaDuznik).getRezervisanoStanje());
-		System.out.println("--------------------------");
-		try {
+		System.out.println("----------------------");
+		System.out.println("firma: "+nal.getDuznik());
+		System.out.println("raspolozivo stanje: " + bankaDuznika.getRacunIznos().get(nal.getRacunDuznik()).getRaspolozivoStanje());
+		System.out.println("rezervisano stanje: " + bankaDuznika.getRacunIznos().get(nal.getRacunDuznik()).getRezervisanoStanje());
+		System.out.println("----------------------");
+
+			try {
 
 			StringWriter sw1 = new StringWriter();
 			marshaluj(bankaDuznika.getRacunIznos().get(nal.getRacunDuznik()),
@@ -726,52 +742,22 @@ public class BankaServisImpl implements BankaServis {
 
 	@Override
 	public void odobriSredstva(MT103I910 MT103I910) {
+		System.out.println("****************BANKA PRIMAOCA*******************");
 		// IZ BAYE UZMI BANKU PO OBRACUNSKOM RACUNU BANKE POVERIOCA IZ MT910
 		Mt103 mt103=MT103I910.getMt103N();
 		Mt910 mt910=MT103I910.getMt910N();
 		
-	/*	generisani.Mt103 saljiMt103=new generisani.Mt103();
-		saljiMt103.setIdPoruke(mt103.getIdPoruke());
-		saljiMt103.setSwiftBanDuznik(mt103.getSwiftBanDuznik());
-		saljiMt103.setObracunskiRacBankeDuznik(mt103.getObracunskiRacBankeDuznik());
-		saljiMt103.setSwiftBanPoverioc(mt103.getSwiftBanPoverioc());
-		saljiMt103.setObracunskiRacunBankePoverioca(mt103.getObracunskiRacunBankePoverioca());
-		saljiMt103.setDuznik(mt103.getDuznik());
-		saljiMt103.setSvrhaPlacanja(mt103.getSvrhaPlacanja());
-		saljiMt103.setPrimalac(mt103.getPrimalac());
-		saljiMt103.setDatumNaloga(mt103.getDatumNaloga());
-		saljiMt103.setDatumValute(mt103.getDatumValute());
-		saljiMt103.setRacunDuznik(mt103.getRacunDuznik());
-		saljiMt103.setModelZaduzenja(mt103.getModelZaduzenja());
-		saljiMt103.setPozivNaBrojZaduzenja(mt103.getPozivNaBrojZaduzenja());
-		saljiMt103.setRacunPoverioca(mt103.getRacunPoverioca());
-		saljiMt103.setModelOdobrenja(mt103.getModelOdobrenja());
-		saljiMt103.setPozivNaBrOdobrenja(mt103.getPozivNaBrOdobrenja());
-		saljiMt103.setIznos(mt103.getIznos());
-		saljiMt103.setSifraValute(mt103.getSifraValute());
-		*/
+
 		try {
-			wsdlCB=new URL("http://SarvanLaptop:1080/CentralnaBanka/CentralnaBankaServis?wsdl");//StartApp.getWsdlCB());
+			wsdlCB=new URL(StartApp.getWsdlCB());
 		} catch (MalformedURLException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		System.out.println("************MT103******************");
-		if(mt103==null){
-			System.out.println("NULL JEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
-		}
-		System.out.println("stvari u mt103: "+mt103.getDuznik()+", "+mt103.getIdPoruke()+", "+mt103.getObracunskiRacBankeDuznik()+", "+mt103.getObracunskiRacunBankePoverioca()
-				+", "+mt103.getPozivNaBrOdobrenja()+", "+mt103.getPozivNaBrojZaduzenja()+", "+mt103.getPrimalac()+", "+mt103.getRacunDuznik()
-				+", "+mt103.getRacunPoverioca()+", "+mt103.getSifraValute()+", "+mt103.getSvrhaPlacanja()+", "+mt103.getSwiftBanPoverioc());
+		System.out.println("--------metoda primi MT103 i MT910--------------");
 		
-		System.out.println("---------------ODOBRI STREDSTVA------------");
-		System.out.println("u odobri sredstva mt910 " + mt910.getIdPorukeNaloga());
-		System.out.println("mt910 banka poverioca " + mt910.getSwiftBanPoverioc() + " " + mt910.getObracunskiRacBanPoverioc());
 		String obracunskiRacBanPoverioca = mt910.getObracunskiRacBanPoverioc();
 		
-		System.out.println("------------------------");
-		System.out.println("USAO U ODOBRi SREDSTVA");
-		System.out.println("------------------------");
+		
 		
 		String upit1 = "for $x in doc('/content/banka.xml')/banke/banka where $x/obracunskiRacun='"
 				+ obracunskiRacBanPoverioca + "' return $x";
@@ -790,23 +776,25 @@ public class BankaServisImpl implements BankaServis {
 		System.out.println("----------------------");
 
 		System.out.println("-----------------------");
-		System.out.println("racun poverioca: "+mt103.getRacunPoverioca());
-		for(String h:bankaPoverioca.getRacunIznos().keySet()){
-			System.out.println("key: "+h);
-			System.out.println("raspolozivo: "+bankaPoverioca.getRacunIznos().get(h).getRaspolozivoStanje());
-			System.out.println("rezervisano: "+bankaPoverioca.getRacunIznos().get(h).getRezervisanoStanje());
-		}
-		System.out.println("POVERIOC PRE PRIMANJA PARA: " + bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca()).getRaspolozivoStanje());
+		System.out.println("     PRE DODAVANJA NOVCA");
+		
+		System.out.println("firma: "+mt103.getRacunPoverioca());
+		System.out.println("raspolozivo: "+bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca()).getRaspolozivoStanje());
+		System.out.println("rezervisano: "+bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca()).getRezervisanoStanje());
 		System.out.println("-----------------------");
+		
 		BigDecimal noviIznos = bankaPoverioca.getRacunIznos()
 				.get(mt103.getRacunPoverioca()).getRaspolozivoStanje()
 				.add(mt103.getIznos());
 		bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca())
 				.setRaspolozivoStanje(noviIznos);
 		// upisi u bazu racuna u banci
-		System.out.println("-----------------------");
-		System.out.println("POVERIOC POSLE PRIMANJA PARA: " + bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca()).getRaspolozivoStanje());
-		System.out.println("-----------------------");
+	System.out.println("     POSLE DODAVANJA NOVCA");
+		
+		System.out.println("firma: "+mt103.getRacunPoverioca());
+		System.out.println("raspolozivo: "+bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca()).getRaspolozivoStanje());
+		System.out.println("rezervisano: "+bankaPoverioca.getRacunIznos().get(mt103.getRacunPoverioca()).getRezervisanoStanje());
+			System.out.println("-----------------------");
 
 		try {
 
@@ -834,7 +822,7 @@ public class BankaServisImpl implements BankaServis {
 		}
 		
 		System.out.println("------------------------------");
-		System.out.println("BANKA sA PARAMA od FIRME: " + bankaPoverioca.getIznosObracunskiRacun());
+		System.out.println("OBRACUNSKI RACUN BANKE POVERIOCA: " + bankaPoverioca.getIznosObracunskiRacun());
 		System.out.println("------------------------------");
 		// sad smanjujem pare sa bankinog racuna, posto je druga firma uplatila
 		// na bankin racun
@@ -845,7 +833,7 @@ public class BankaServisImpl implements BankaServis {
 		// mislim da treba da se update-uje racun od banke, jer sam menjala
 		// iznos
 		System.out.println("---------------------");
-		System.out.println("BANKA sA SKINUTIM PARAMA FIRME: " + bankaPoverioca.getIznosObracunskiRacun());
+		System.out.println("OBRACUNSKI RACUN BANKE PRIMAOCA POSLE ODOBRENJA: " + bankaPoverioca.getIznosObracunskiRacun());
 		System.out.println("------------------------------");
 
 		try {
@@ -918,7 +906,7 @@ public class BankaServisImpl implements BankaServis {
 	@Override
 	public Presek obradiZahtevZaIzvod(ZahtevZaIzvod zahtevZaIzvod) {
 		try {
-			wsdlCB=new URL("http://SarvanLaptop:1080/CentralnaBanka/CentralnaBankaServis?wsdl");//StartApp.getWsdlCB());
+			wsdlCB=new URL(StartApp.getWsdlCB());
 		} catch (MalformedURLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
