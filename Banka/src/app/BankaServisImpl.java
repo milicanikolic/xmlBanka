@@ -79,11 +79,13 @@ public class BankaServisImpl implements BankaServis {
 		System.out.println("BANKA DUZNIKA " + bankaDuznika.getNaziv());
 		System.out.println("----------------------");
 
+		
 		String oznakaBankePrimaoca = nalog.getRacunPoverioca().substring(0, 3);
 		String upit2 = "for $x in doc('/content/banka.xml')/banke/banka where $x/oznakaBanke='"
 				+ oznakaBankePrimaoca + "' return $x";
 		String odgovor2 = posaljiUpit(upit2);
-
+System.out.println("odg: "+odgovor2);
+System.out.println("oznaka: "+oznakaBankePrimaoca);
 		Banka bankaPrimaoca = null;
 		try {
 			bankaPrimaoca = unmarshaluj(Banka.class, new StreamSource(
@@ -408,170 +410,9 @@ public class BankaServisImpl implements BankaServis {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-
-				// iscitati sve mt102 (ako je ista banka duznika tada proveravam ??????????????
-				// koliko placanja ima toj mt102 ako ih ima 3 treba da se
-				// posalje taj mt102
-				// i da se izbrise iz baze, ako ih nema 3 napravis novo 102
-				// setujes i dodas novo u listu, opet vidis je l ih ima 3 ako
-				// ima saljes
-				// i brises ako nema upises ceo mt u bazu)
-
-				String upitPre = "declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
-						+ " for $x in doc('/content/mt102.xml')/mt102:mt102S/mt102:mt102[mt102:zaglavljeMt102/mt102:swiftBankaPoverioc='"
-						+ bankaPrimaoca.getSwiftCode() + "'] return $x";
-
-				String odgovor = posaljiUpit(upitPre);
-				if (odgovor == null) {
-					System.out.println("NEMA UPLATA ZA TU FIRMU KREIRA SE NOVA MT102");
-					// ne postoji, radi sta treba
-					// napravi sve
-
-					Mt102 mt102 = new Mt102();
-
-					ZaglavljeMt102 zaglavljeMt102 = new ZaglavljeMt102();
-					zaglavljeMt102.setDatum(nalog.getDatumNaloga());
-					zaglavljeMt102.setDatumValute(nalog.getDatumValute());
-					zaglavljeMt102.setIdPoruke(UUID.randomUUID().toString());// nzm
-																				// je
-																				// l
-																				// treba
-																				// da
-																				// se
-																				// uzme
-																				// sa
-																				// naloga
-																				// ili
-																				// ovaj
-																				// nov
-					// zaglavljeMt102.setObracunskiRacBanDuznik(nalog.get);
-					zaglavljeMt102.setSifraValute(nalog.getOznakaValute());
-					zaglavljeMt102.getUkupanIznos().add(nalog.getIznos()); // sa
-																			// svakog
-																			// naloga
-																			// dodajem
-																			// iznos
-					zaglavljeMt102.setSwiftBankaDuznik(bankaDuznika
-							.getSwiftCode());
-					zaglavljeMt102.setSwiftBankaPoverioc(bankaPrimaoca
-							.getSwiftCode());
-
-					PojedinacnoPlacanjeMt102 pojedinacnoMt2 = new PojedinacnoPlacanjeMt102(
-							nalog.getIdPoruke(), nalog.getDuznik(),
-							nalog.getSvrhaPlacanja(), nalog.getPrimalac(),
-							nalog.getDatumNaloga(), nalog.getRacunDuznik(),
-							nalog.getModelZaduzenja(),
-							nalog.getPozivNaBrZaduzenja(),
-							nalog.getRacunPoverioca(),
-							nalog.getModelOdobrenja(),
-							nalog.getPozivNaBrOdobrenja(), nalog.getIznos(),
-							nalog.getOznakaValute());
-
-					mt102.setZaglavljeMt102(zaglavljeMt102);
-					mt102.getPojedinacnoPlacanjeMt102().add(pojedinacnoMt2);
-
-					try {
-						StringWriter sw = new StringWriter();
-						marshaluj(mt102, sw);
-						String kon = sw.toString().substring(
-								sw.toString().indexOf("mt102") - 1,
-								sw.toString().length());
-						String upit = "declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
-								+ " xdmp:node-insert-child(doc('/content/mt102.xml')/mt102:mt102S,"
-								+ kon + ");";
-						posaljiUpit(upit);
-					
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-				}
-
-				else {
-					// vratio mi je taj MT102
-					System.out.println("POSTOJI MT102 ZA TU BANKU");
-					Mt102 mt102 = null;
-					try {
-						mt102 = unmarshaluj(Mt102.class, new StreamSource(
-								new StringReader(odgovor)));
-						
-					} catch (JAXBException e) {
-						e.printStackTrace();
-					}
-
-					if (mt102.getPojedinacnoPlacanjeMt102().size() == 3) {
-						// poslati mt102
-						System.out
-								.println("MT102 ima tri pojedinacna placanja");
-
-						Service service = Service.create(wsdlCB, serviceNameCB);
-					      CentralnaBankaServis inter = service
-					               .getPort(portNameCB, CentralnaBankaServis.class);
-					      inter.primiMt102(mt102);
-					      
-					      System.out.println("------------POSLATA MT102 CENTRALNOJ BANCI------------");
-					      
-						String upit = "declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
-								+ " xdmp:node-delete(doc('/content/mt102.xml')/mt102:mt102S/mt102:mt102[mt102:zaglavljeMt102/mt102:idPoruke='"
-								+ mt102.getZaglavljeMt102().getIdPoruke()
-								+ "'])";
-						posaljiUpit(upit);
-
-					} else {
-						System.out
-								.println("Nasao MT102, nema dovoljno pojedinacnih placanja");
-						PojedinacnoPlacanjeMt102 pojedinacnoMt2 = new PojedinacnoPlacanjeMt102(
-								nalog.getIdPoruke(), nalog.getDuznik(),
-								nalog.getSvrhaPlacanja(), nalog.getPrimalac(),
-								nalog.getDatumNaloga(), nalog.getRacunDuznik(),
-								nalog.getModelZaduzenja(),
-								nalog.getPozivNaBrZaduzenja(),
-								nalog.getDuznik(), nalog.getModelOdobrenja(),
-								nalog.getPozivNaBrOdobrenja(),
-								nalog.getIznos(), nalog.getOznakaValute());
-						// mt102.getPojedinacnoPlacanjeMt102().add(pojedinacnoMt2);
-						mt102.getPojedinacnoPlacanjeMt102().add(pojedinacnoMt2);
-						
-						if (mt102.getPojedinacnoPlacanjeMt102().size() == 3) {
-							// poslati mt102
-							Service service = Service.create(wsdlCB, serviceNameCB);
-						      CentralnaBankaServis inter = service
-						               .getPort(portNameCB, CentralnaBankaServis.class);
-						      inter.primiMt102(mt102);
-						      
-						      System.out.println("------------POSLATA MT102 CENTRALNOJ BANCI------------");
-							String upit = "declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
-									+ "xdmp:node-delete(doc('/content/mt102.xml')/mt102:mt102S/mt102:mt102[mt102:zaglavljeMt102/mt102:idPoruke='"
-									+ mt102.getZaglavljeMt102().getIdPoruke()
-									+ "'])";
-							posaljiUpit(upit);
-
-						} else {
-						
-							try {
-								StringWriter sw = new StringWriter();
-								marshaluj(mt102, sw);
-								String kon = sw.toString().substring(
-										sw.toString().indexOf("mt102") - 1,
-										sw.toString().length());
-								String upit = "declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
-										+ " xdmp:node-replace(doc('/content/mt102.xml')/mt102:mt102S/mt102:mt102[mt102:zaglavljeMt102/mt102:idPoruke='"
-										+ mt102.getZaglavljeMt102()
-												.getIdPoruke()
-										+ "'],"
-										+ kon
-										+ ")";
-								
-								posaljiUpit(upit);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-
-						}
-					}
-
-				}
-
+				
+				
+				//CUVANJE UPLATA U BAZU
 				String upitPre1 = "for $x in doc('/content/uplata.xml')/uplate/uplata[racunPrimaoca='"
 						+ nalog.getRacunPoverioca() + "'] return $x";
 
@@ -623,6 +464,201 @@ public class BankaServisImpl implements BankaServis {
 
 				}
 
+				// iscitati sve mt102 (ako je ista banka duznika tada proveravam ??????????????
+				// koliko placanja ima toj mt102 ako ih ima 3 treba da se
+				// posalje taj mt102
+				// i da se izbrise iz baze, ako ih nema 3 napravis novo 102
+				// setujes i dodas novo u listu, opet vidis je l ih ima 3 ako
+				// ima saljes
+				// i brises ako nema upises ceo mt u bazu)
+
+				String upitPre = //"declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
+						 " for $x in doc('/content/mt102.xml')/mt102S/mt102[zaglavljeMt102/swiftBankaPoverioc='"
+						+ bankaPrimaoca.getSwiftCode() + "'] return $x";
+
+				String odgovor = posaljiUpit(upitPre);
+				if (odgovor == null) {
+					System.out.println("NEMA UPLATA ZA TU FIRMU KREIRA SE NOVA MT102");
+					// ne postoji, radi sta treba
+					// napravi sve
+
+					Mt102 mt102 = new Mt102();
+
+					ZaglavljeMt102 zaglavljeMt102 = new ZaglavljeMt102();
+					zaglavljeMt102.setDatum(nalog.getDatumNaloga());
+					zaglavljeMt102.setDatumValute(nalog.getDatumValute());
+					zaglavljeMt102.setIdPoruke(UUID.randomUUID().toString());// nzm
+																				// je
+																				// l
+																				// treba
+																				// da
+																				// se
+																				// uzme
+																				// sa
+																				// naloga
+																				// ili
+																				// ovaj
+																				// nov
+					 zaglavljeMt102.setObracunskiRacBanDuznik(bankaDuznika.getObracunskiRacun());
+					zaglavljeMt102.setSifraValute(nalog.getOznakaValute());
+					zaglavljeMt102.setObracunskiRacunBanPoverioc(bankaPrimaoca.getObracunskiRacun());
+					zaglavljeMt102.setSwiftBankaDuznik(bankaDuznika
+							.getSwiftCode());
+					zaglavljeMt102.setSwiftBankaPoverioc(bankaPrimaoca
+							.getSwiftCode());
+
+					PojedinacnoPlacanjeMt102 pojedinacnoMt2 = new PojedinacnoPlacanjeMt102(
+							nalog.getIdPoruke(), nalog.getDuznik(),
+							nalog.getSvrhaPlacanja(), nalog.getPrimalac(),
+							nalog.getDatumNaloga(), nalog.getRacunDuznik(),
+							nalog.getModelZaduzenja(),
+							nalog.getPozivNaBrZaduzenja(),
+							nalog.getRacunPoverioca(),
+							nalog.getModelOdobrenja(),
+							nalog.getPozivNaBrOdobrenja(), nalog.getIznos(),
+							nalog.getOznakaValute());
+
+					mt102.setZaglavljeMt102(zaglavljeMt102);
+					mt102.getPojedinacnoPlacanjeMt102().add(pojedinacnoMt2);
+					mt102.getZaglavljeMt102().setUkupanIznos(mt102.getZaglavljeMt102().getUkupanIznos().add(pojedinacnoMt2.getIznos()));
+
+					try {
+						StringWriter sw = new StringWriter();
+						marshaluj(mt102, sw);
+						String kon = sw.toString().substring(
+								sw.toString().indexOf("mt102") -1,
+								sw.toString().length());
+						System.out.println(kon);
+						String upit =// "declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
+								" xdmp:node-insert-child(doc('/content/mt102.xml')/mt102S,"
+								+kon + ");";
+						posaljiUpit(upit);
+					
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				}
+
+				else {
+					// vratio mi je taj MT102
+					System.out.println("POSTOJI MT102 ZA TU BANKU");
+					Mt102 mt102 = null;
+					try {
+						mt102 = unmarshaluj(Mt102.class, new StreamSource(
+								new StringReader(odgovor)));
+						
+					} catch (JAXBException e) {
+						e.printStackTrace();
+					}
+
+					if (mt102.getPojedinacnoPlacanjeMt102().size() == 3) {
+						// poslati mt102
+						System.out
+								.println("MT102 ima tri pojedinacna placanja");
+
+						Service service = Service.create(wsdlCB, serviceNameCB);
+					      CentralnaBankaServis inter = service
+					               .getPort(portNameCB, CentralnaBankaServis.class);
+					      System.out.println("------------POSLATA MT102 CENTRALNOJ BANCI------------");
+					      
+					      inter.primiMt102(mt102);
+					      
+					      
+			/*		      
+						String upit = //"declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
+								 " xdmp:node-delete(doc('/content/mt102.xml')/mt102S/mt102[zaglavljeMt102/idPoruke='"
+								+ mt102.getZaglavljeMt102().getIdPoruke()
+								+ "'])";
+						posaljiUpit(upit);
+						*/
+
+					} else {
+						System.out
+								.println("Nasao MT102, nema dovoljno pojedinacnih placanja");
+						PojedinacnoPlacanjeMt102 pojedinacnoMt2 = new PojedinacnoPlacanjeMt102(
+								nalog.getIdPoruke(), nalog.getDuznik(),
+								nalog.getSvrhaPlacanja(), nalog.getPrimalac(),
+								nalog.getDatumNaloga(), nalog.getRacunDuznik(),
+								nalog.getModelZaduzenja(),
+								nalog.getPozivNaBrZaduzenja(),
+								nalog.getDuznik(), nalog.getModelOdobrenja(),
+								nalog.getPozivNaBrOdobrenja(),
+								nalog.getIznos(), nalog.getOznakaValute());
+						// mt102.getPojedinacnoPlacanjeMt102().add(pojedinacnoMt2);
+						mt102.getPojedinacnoPlacanjeMt102().add(pojedinacnoMt2);
+						mt102.getZaglavljeMt102().setUkupanIznos(mt102.getZaglavljeMt102().getUkupanIznos().add(pojedinacnoMt2.getIznos()));
+						System.out.println("dodao pojedinacno ad ima: "+mt102.getPojedinacnoPlacanjeMt102().size());
+						
+						try {
+							StringWriter sw = new StringWriter();
+							marshaluj(mt102, sw);
+							String kon = sw.toString().substring(
+									sw.toString().indexOf("mt102") - 1,
+									sw.toString().length());
+							
+							String upit = //"declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
+									 " xdmp:node-replace(doc('/content/mt102.xml')/mt102S/mt102[zaglavljeMt102/idPoruke='"
+									+ mt102.getZaglavljeMt102()
+											.getIdPoruke()
+									+ "'],"
+									+ kon
+									+ ")";
+							
+							posaljiUpit(upit);
+							
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						
+						if (mt102.getPojedinacnoPlacanjeMt102().size() == 3) {
+							// poslati mt102
+							Service service = Service.create(wsdlCB, serviceNameCB);
+						      CentralnaBankaServis inter = service
+						               .getPort(portNameCB, CentralnaBankaServis.class);
+						      System.out.println("------------POSLATA MT102 CENTRALNOJ BANCI------------");
+						      
+						      inter.primiMt102(mt102);
+						      
+						     
+					/*
+						      String upit = //"declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
+									 "xdmp:node-delete(doc('/content/mt102.xml')/mt102S/mt102[zaglavljeMt102/idPoruke='"
+									+ mt102.getZaglavljeMt102().getIdPoruke()
+									+ "'])";
+							posaljiUpit(upit);
+							*/
+
+						} else {
+						
+							try {
+								StringWriter sw = new StringWriter();
+								marshaluj(mt102, sw);
+								String kon = sw.toString().substring(
+										sw.toString().indexOf("mt102") - 1,
+										sw.toString().length());
+								
+								String upit = //"declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
+										 " xdmp:node-replace(doc('/content/mt102.xml')/mt102S/mt102[zaglavljeMt102/idPoruke='"
+										+ mt102.getZaglavljeMt102()
+												.getIdPoruke()
+										+ "'],"
+										+ kon
+										+ ")";
+								
+								posaljiUpit(upit);
+								
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+
+						}
+					}
+
+				}
+
+				
+
 			}
 
 		}
@@ -659,41 +695,158 @@ public class BankaServisImpl implements BankaServis {
 		System.out.println("----------------------");
 		System.out.println("BANKA DUZNIKA:" + bankaDuznika.getNaziv());
 
-
-		// uzmi iz baze nalog po idNaloga
-		String idNaloga = mt900.getIdPorukeNaloga();
-		String upit = "declare namespace nal='http://ftn.uns.ac.rs/nalog';" + "for $x in doc('/content/uplata.xml')/uplate/uplata/nalozi[nal:idPoruke='"
-				+ idNaloga + "'] return $x"; 
-		String odgovor = posaljiUpit(upit);
-
-		Nalog nal = null;
-		try {
-			nal = unmarshaluj(Nalog.class, new StreamSource(new StringReader(
-					odgovor)));
-		} catch (JAXBException e) {
-			e.printStackTrace();
-		}
-
-		String brojRacunaDuznik = nal.getRacunDuznik();
-
-	
-		System.out.println("OBRACUNSKI RACUN BANKE DUZNIKA PRE VRACANJA PARA: " + bankaDuznika.getIznosObracunskiRacun());
-
 		
-		// vracam banci rezervisane pare, posto ce CB da skine banci sa racuna
-		// iznos sa naloga.
+		
+		String idNaloga = mt900.getIdPoruke();
+		
+		BigDecimal noviIznos=new BigDecimal(0);
+		
+		if(mt900.getIdPorukeNaloga().equals("MT102")){
+			
+			
+			String upit102 = "for $x in doc('/content/mt102.xml')/mt102S/mt102[zaglavljeMt102/idPoruke='"
+					+ idNaloga + "'] return $x"; 
+			String odg102=posaljiUpit(upit102);
+			
+			Mt102 mt102=null;
+			
+			try {
+				mt102 = unmarshaluj(Mt102.class, new StreamSource(new StringReader(
+						odg102)));
+			} catch (JAXBException e) {
+				e.printStackTrace();
+			}
+			System.out.println("OBRACUNSKI RACUN BANKE DUZNIKA PRE VRACANJA PARA: " + bankaDuznika.getIznosObracunskiRacun());
 
-		BigDecimal noviIznos = bankaDuznika.getIznosObracunskiRacun().add(
+			noviIznos = bankaDuznika.getIznosObracunskiRacun().add(
+					mt102.getZaglavljeMt102().getUkupanIznos());
+			bankaDuznika.setIznosObracunskiRacun(noviIznos);
+			
+	
+		
+			System.out.println("OBRACUNSKI RACUN BANKE DUZNIKA NAKON VRACANJA PARA: " + bankaDuznika.getIznosObracunskiRacun());
+			System.out.println("--------------------");
+			
+			
+			
+			for(PojedinacnoPlacanjeMt102 poj:mt102.getPojedinacnoPlacanjeMt102()) {
+			
+				String brojRacunaDuznik=poj.getRacunDuznik();
+				// SAD SKIDAM IZNOS SA RACUNA DUZNIKA TAKO STO MU UZMEM REZERVISANO
 				bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
-						.getRezervisanoStanje());
-		bankaDuznika.setIznosObracunskiRacun(noviIznos);
+						.setRezervisanoStanje(new BigDecimal(0));
+				// UPISI NOVO RACUN IZNOS U BANKUDUYNIKA NA NJEGOVO MESTO U MAPI PO
+				// NJEGOVOM RACUNU
+				System.out.println("----------------------");
+				System.out.println("firma: "+brojRacunaDuznik);
+				System.out.println("raspolozivo stanje: " + bankaDuznika.getRacunIznos().get(brojRacunaDuznik).getRaspolozivoStanje());
+				System.out.println("rezervisano stanje: " + bankaDuznika.getRacunIznos().get(brojRacunaDuznik).getRezervisanoStanje());
+				System.out.println("----------------------");
+
+					try {
+
+					StringWriter sw1 = new StringWriter();
+					marshaluj(bankaDuznika.getRacunIznos().get(brojRacunaDuznik),
+							sw1);
+					String kon1 = sw1.toString().substring(
+							sw1.toString().indexOf("raspolozivoStanje") - 1,
+							sw1.toString().indexOf("</racunUBanci>"));
+
+					// UPISIVANJE NOVIH STANJA RACUNA U BAZU
+					String upit3 = "xdmp:node-replace(doc('/content/banka.xml')/banke/banka[oznakaBanke='"
+							+ bankaDuznika.getOznakaBanke()
+							+ "']/racunIznos/entry[key='"
+							+ brojRacunaDuznik
+							+ "']/value, <value>" + kon1 + "</value>)";
+					posaljiUpit(upit3);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
+			 String upit = //"declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
+					 "xdmp:node-delete(doc('/content/mt102.xml')/mt102S/mt102[zaglavljeMt102/idPoruke='"
+					+ mt102.getZaglavljeMt102().getIdPoruke()
+					+ "'])";
+			posaljiUpit(upit);
+			
+		}else if(mt900.getIdPorukeNaloga().equals("MT103")){
+			String upit = "declare namespace nal='http://ftn.uns.ac.rs/nalog';" + "for $x in doc('/content/uplata.xml')/uplate/uplata/nalozi[nal:idPoruke='"
+					+ idNaloga + "'] return $x"; 
+			String odgovor = posaljiUpit(upit);
+
+			Nalog nal = null;
+			try {
+				nal = unmarshaluj(Nalog.class, new StreamSource(new StringReader(
+						odgovor)));
+			} catch (JAXBException e) {
+				e.printStackTrace();
+			}
+
+			String brojRacunaDuznik= nal.getRacunDuznik();
+			
+			System.out.println("OBRACUNSKI RACUN BANKE DUZNIKA PRE VRACANJA PARA: " + bankaDuznika.getIznosObracunskiRacun());
+
+			
+			// vracam banci rezervisane pare, posto ce CB da skine banci sa racuna
+			// iznos sa naloga.
+
+			noviIznos = bankaDuznika.getIznosObracunskiRacun().add(
+					bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
+							.getRezervisanoStanje());
+			
+			System.out.println("iznos koji se prebacuje rezervisano : "+ 
+					bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
+							.getRezervisanoStanje() + " ono sa naloga " + nal.getIznos());
+			
+			bankaDuznika.setIznosObracunskiRacun(noviIznos);
+			
+			// mislim da treba da se update-uje racun od banke, jer sam menjala
+			// iznos
+			
 		
-		// mislim da treba da se update-uje racun od banke, jer sam menjala
-		// iznos
+			System.out.println("OBRACUNSKI RACUN BANKE DUZNIKA NAKON VRACANJA PARA: " + bankaDuznika.getIznosObracunskiRacun());
+			System.out.println("--------------------");
+			
+			
+			// SAD SKIDAM IZNOS SA RACUNA DUZNIKA TAKO STO MU UZMEM REZERVISANO
+			bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
+					.setRezervisanoStanje(new BigDecimal(0));
+			// UPISI NOVO RACUN IZNOS U BANKUDUYNIKA NA NJEGOVO MESTO U MAPI PO
+			// NJEGOVOM RACUNU
+			System.out.println("----------------------");
+			System.out.println("firma: "+brojRacunaDuznik);
+			System.out.println("raspolozivo stanje: " + bankaDuznika.getRacunIznos().get(brojRacunaDuznik).getRaspolozivoStanje());
+			System.out.println("rezervisano stanje: " + bankaDuznika.getRacunIznos().get(brojRacunaDuznik).getRezervisanoStanje());
+			System.out.println("----------------------");
+
+				try {
+
+				StringWriter sw1 = new StringWriter();
+				marshaluj(bankaDuznika.getRacunIznos().get(brojRacunaDuznik),
+						sw1);
+				String kon1 = sw1.toString().substring(
+						sw1.toString().indexOf("raspolozivoStanje") - 1,
+						sw1.toString().indexOf("</racunUBanci>"));
+
+				// UPISIVANJE NOVIH STANJA RACUNA U BAZU
+				String upit3 = "xdmp:node-replace(doc('/content/banka.xml')/banke/banka[oznakaBanke='"
+						+ bankaDuznika.getOznakaBanke()
+						+ "']/racunIznos/entry[key='"
+						+ brojRacunaDuznik
+						+ "']/value, <value>" + kon1 + "</value>)";
+				posaljiUpit(upit3);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			
+			
+		}
 		
+
 	
-		System.out.println("OBRACUNSKI RACUN BANKE DUZNIKA NAKON VRACANJA PARA: " + bankaDuznika.getIznosObracunskiRacun());
-		System.out.println("--------------------");
+		//cuvam obracunski iznos banke i za mt102 i za mt103
 
 		try {
 
@@ -707,36 +860,7 @@ public class BankaServisImpl implements BankaServis {
 			e.printStackTrace();
 		}
 
-		// SAD SKIDAM IZNOS SA RACUNA DUZNIKA TAKO STO MU UZMEM REZERVISANO
-		bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
-				.setRezervisanoStanje(new BigDecimal(0));
-		// UPISI NOVO RACUN IZNOS U BANKUDUYNIKA NA NJEGOVO MESTO U MAPI PO
-		// NJEGOVOM RACUNU
-		System.out.println("----------------------");
-		System.out.println("firma: "+nal.getDuznik());
-		System.out.println("raspolozivo stanje: " + bankaDuznika.getRacunIznos().get(nal.getRacunDuznik()).getRaspolozivoStanje());
-		System.out.println("rezervisano stanje: " + bankaDuznika.getRacunIznos().get(nal.getRacunDuznik()).getRezervisanoStanje());
-		System.out.println("----------------------");
-
-			try {
-
-			StringWriter sw1 = new StringWriter();
-			marshaluj(bankaDuznika.getRacunIznos().get(nal.getRacunDuznik()),
-					sw1);
-			String kon1 = sw1.toString().substring(
-					sw1.toString().indexOf("raspolozivoStanje") - 1,
-					sw1.toString().indexOf("</racunUBanci>"));
-
-			// UPISIVANJE NOVIH STANJA RACUNA U BAZU
-			String upit3 = "xdmp:node-replace(doc('/content/banka.xml')/banke/banka[oznakaBanke='"
-					+ bankaDuznika.getOznakaBanke()
-					+ "']/racunIznos/entry[key='"
-					+ nal.getRacunDuznik()
-					+ "']/value, <value>" + kon1 + "</value>)";
-			posaljiUpit(upit3);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
 
 	}
 
@@ -852,16 +976,29 @@ public class BankaServisImpl implements BankaServis {
 	@Override
 	public void primiMt102i910(MT102I910 MT102I910) {
 		
-		System.out.println("*****************BANKA******************");
+		System.out.println("*****************BANKA PRIMAOCA******************");
 		System.out.println("Metoda: Primi MT102 i MT910");
 		
 		Mt102 mt102=MT102I910.getMt102N();
 		Mt910 mt910=MT102I910.getMt910N();
 		
+		if(mt102.getZaglavljeMt102()==null) {
+		System.out.println("zaglavlje null prazna ");
+		}
+		if(mt102.getPojedinacnoPlacanjeMt102()==null) {
+			System.out.println("pojedinacno null prazna ");
+			}
+		
+		if(mt910.getObracunskiRacBanPoverioc()==null) {
+			System.out.println("mt910 prazna ");
+			}
+		
+		//System.out.println("MT102: " + mt102.getZaglavljeMt102().getObracunskiRacBanDuznik()+ mt102.getZaglavljeMt102().getObracunskiRacunBanPoverioc());
+System.out.println("MT910: " +mt910.getObracunskiRacBanPoverioc());		
 		Banka bankaPoverioca=null;
 		
 		String upit1 = "for $x in doc('/content/banka.xml')/banke/banka where $x/obracunskiRacun='"
-				+ mt102.getZaglavljeMt102().getObracunskiRacunBanPoverioc() + "' return $x";
+				+ mt910.getObracunskiRacBanPoverioc() + "' return $x";
 		String odgovor1 = posaljiUpit(upit1);
 
 		try {
@@ -874,11 +1011,13 @@ public class BankaServisImpl implements BankaServis {
 		for(PojedinacnoPlacanjeMt102 pojedinacno:mt102.getPojedinacnoPlacanjeMt102()){
 			System.out.println("Skida se sa obracunskog racuna banke: "+bankaPoverioca.getNaziv()+" ,iznos: "+pojedinacno.getIznos());
 			bankaPoverioca.setIznosObracunskiRacun(bankaPoverioca.getIznosObracunskiRacun().subtract(pojedinacno.getIznos()));
-			
-			
-			System.out.println("Firmi: "+bankaPoverioca.getRacunFirme().get(pojedinacno.getPrimalac())+" se dodaje: "+pojedinacno.getIznos());
+		
 			String racunFirmePrimaoca=bankaPoverioca.getRacunFirme().get(pojedinacno.getPrimalac());
+			
 			bankaPoverioca.getRacunIznos().get(racunFirmePrimaoca).setRaspolozivoStanje(bankaPoverioca.getRacunIznos().get(racunFirmePrimaoca).getRaspolozivoStanje().add(pojedinacno.getIznos()));
+			System.out.println("-------------------------");
+			System.out.println("Firma: "+pojedinacno.getPrimalac());
+			System.out.println("Raspolozivo stanje: "+bankaPoverioca.getRacunIznos().get(racunFirmePrimaoca).getRaspolozivoStanje());
 		}
 		System.out.println("Iznos obracunskog racuna banke primaoca je: "+bankaPoverioca.getIznosObracunskiRacun());
 		
@@ -886,16 +1025,14 @@ public class BankaServisImpl implements BankaServis {
 			StringWriter sw2 = new StringWriter();
 			marshaluj(bankaPoverioca, sw2);
 			String kon2 = sw2.toString().substring(
-					sw2.toString().indexOf("banka") - 1,
+					sw2.toString().indexOf("banka") -1,
 					sw2.toString().length());
-
+System.out.println("kon2: "+kon2);
 			String upit4 = "xdmp:node-replace(doc('/content/banka.xml')/banke/banka[oznakaBanke='"
 					+ bankaPoverioca.getOznakaBanke()
-					+ "', <banka>"
-					+ kon2 + "</banka>)";
-			System.out.println(kon2);
-			System.out.println(upit4);
-			System.out.println("Banka primaoca upisana u bazu");
+					+ "'],"
+					+ kon2 + ")";
+
 			posaljiUpit(upit4);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -308,6 +308,8 @@ public class ZaglavljeMt102 {
 
 	public ZaglavljeMt102() {
 		super();
+		this.ukupanIznos=new BigDecimal(0);
+		
 	}
     
 
