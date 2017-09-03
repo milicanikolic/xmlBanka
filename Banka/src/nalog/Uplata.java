@@ -1,4 +1,4 @@
-package banka;
+package nalog;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -6,9 +6,8 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import nalog.Nalog;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -16,6 +15,8 @@ public class Uplata implements Serializable {
 
 	private static final long serialVersionUID = -422459348864485424L;
 	private String racunPrimaoca;
+	
+	@XmlElement(name="nalog",namespace="http://ftn.uns.ac.rs/nalog")
 	private List<Nalog> nalozi;
 
 	public Uplata() {

@@ -12,6 +12,8 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.jws.WebService;
@@ -20,6 +22,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -30,15 +34,16 @@ import mt103imt910.MT103I910;
 import mt900.Mt900;
 import mt910.Mt910;
 import nalog.Nalog;
+import nalog.Nalozi;
+import nalog.Uplata;
 import presek.Presek;
 import presek.StavkaPreseka;
 import presek.ZaglavljePreseka;
-import wrapper.Nalozi;
 import zahtevZaIzvod.ZahtevZaIzvod;
 import banka.Banka;
-import banka.RacunUBanci;
-import banka.Uplata;
 
+import com.marklogic.client.eval.EvalResult;
+import com.marklogic.client.eval.EvalResultIterator;
 import com.marklogic.client.eval.ServerEvaluationCall;
 
 @WebService(portName = "Banka", serviceName = "BankaServis", targetNamespace = "http://ftn.uns.ac.rs/banka", endpointInterface = "app.BankaServis")
@@ -293,7 +298,7 @@ System.out.println("oznaka: "+oznakaBankePrimaoca);
 					e.printStackTrace();
 				}
 
-				String upitPre1 = "for $x in doc('/content/uplata.xml')/uplate/uplata[racunPrimaoca='"
+				String upitPre1 = "declare namespace nal='http://ftn.uns.ac.rs/nalog';"+" for $x in doc('/content/uplata.xml')/uplate/nal:uplata[nal:racunPrimaoca='"
 						+ nalog.getRacunPoverioca() + "'] return $x";
 
 				String odgovorUplata = posaljiUpit(upitPre1);
@@ -335,8 +340,10 @@ System.out.println("oznaka: "+oznakaBankePrimaoca);
 						String kon = sw.toString().substring(
 								sw.toString().indexOf("uplata") - 1,
 								sw.toString().length());
+						
+						System.out.println("uplata marsalovano " + kon);
 					
-						String upit = "xdmp:node-replace(doc('/content/uplata.xml')/uplate/uplata[racunPrimaoca='"
+						String upit ="declare namespace nal='http://ftn.uns.ac.rs/nalog';" +" xdmp:node-replace(doc('/content/uplata.xml')/uplate/nal:uplata[nal:racunPrimaoca='"
 								+ nalog.getRacunPoverioca() + "']," + kon + ")";
 						
 						posaljiUpit(upit);
@@ -413,12 +420,12 @@ System.out.println("oznaka: "+oznakaBankePrimaoca);
 				
 				
 				//CUVANJE UPLATA U BAZU
-				String upitPre1 = "for $x in doc('/content/uplata.xml')/uplate/uplata[racunPrimaoca='"
+				String upitPre1 = "declare namespace nal='http://ftn.uns.ac.rs/nalog';"+" for $x in doc('/content/uplata.xml')/uplate/nal:uplata[nal:racunPrimaoca='"
 						+ nalog.getRacunPoverioca() + "'] return $x";
 
 				String odgovorUplata = posaljiUpit(upitPre1);
 				if (odgovorUplata == null) {
-
+					System.out.println("pravi novu uplatu!!!!");
 					Uplata novaUplata = new Uplata();
 					novaUplata.setRacunPrimaoca(nalog.getRacunPoverioca());
 					novaUplata.dodajNalog(nalog);
@@ -455,7 +462,7 @@ System.out.println("oznaka: "+oznakaBankePrimaoca);
 								sw.toString().indexOf("uplata") - 1,
 								sw.toString().length());
 						
-						String upit = "xdmp:node-replace(doc('/content/uplata.xml')/uplate/uplata[racunPrimaoca='"
+						String upit = "declare namespace nal='http://ftn.uns.ac.rs/nalog';"+" xdmp:node-replace(doc('/content/uplata.xml')/uplate/nal:uplata[nal:racunPrimaoca='"
 								+ nalog.getRacunPoverioca() + "']," + kon + ")";
 						posaljiUpit(upit);
 					} catch (Exception e) {
@@ -771,7 +778,7 @@ System.out.println("oznaka: "+oznakaBankePrimaoca);
 			posaljiUpit(upit);
 			
 		}else if(mt900.getIdPorukeNaloga().equals("MT103")){
-			String upit = "declare namespace nal='http://ftn.uns.ac.rs/nalog';" + "for $x in doc('/content/uplata.xml')/uplate/uplata/nalozi[nal:idPoruke='"
+			String upit = "declare namespace nal='http://ftn.uns.ac.rs/nalog';" + "for $x in doc('/content/uplata.xml')/uplate/nal:uplata/nal:nalog[nal:idPoruke='"
 					+ idNaloga + "'] return $x"; 
 			String odgovor = posaljiUpit(upit);
 
@@ -1063,29 +1070,53 @@ System.out.println("kon2: "+kon2);
 				+ oznakaBanke + "' return $x";
 		String odgovor1 = posaljiUpit(upit1);
 
-		Banka izvodIzBanke = null;
+		Banka banka = null;
 		try {
-			izvodIzBanke = unmarshaluj(Banka.class, new StreamSource(
+			banka = unmarshaluj(Banka.class, new StreamSource(
 					new StringReader(odgovor1)));
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}
 
 		System.out.println("----------------------");
-		System.out.println("BANKA DUZNIKA " + izvodIzBanke.getNaziv());
+		System.out.println("BANKA DUZNIKA " + banka.getNaziv());
 		System.out.println("----------------------");
+		
+		XMLGregorianCalendar datum=zahtevZaIzvod.getDatum();
+		datum.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
+		zahtevZaIzvod.setDatum(datum);
+		
 
-		String upitPre1 = "for $x in doc('/content/uplata.xml')/uplate/uplata[racunPrimaoca='"
+		String upitPre1 ="declare namespace nal='http://ftn.uns.ac.rs/nalog';" + " for $x in doc('/content/uplata.xml')/uplate/nal:uplata[nal:racunPrimaoca='"
 				+ zahtevZaIzvod.getBrojRacuna()
-				+ "']/nalozi[datumNaloga= "
-				+ zahtevZaIzvod.getDatum() + "] return $x";
-		System.out.println("PRE SLANJA");
+				+ "']/nal:nalog[nal:datumNaloga= '"
+				+ datum + "'] return $x";
+		
+		
+		ServerEvaluationCall poziv = StartApp.getClient().newServerEval();
+		List<Nalog> listaNaloga = new ArrayList<Nalog>();
+		try {
+		JAXBContext jc = JAXBContext.newInstance(Nalozi.class);
+		Unmarshaller unmarsaller = jc.createUnmarshaller();
+		EvalResultIterator it = poziv.xquery(upitPre1).eval();
+		System.out.println("iterator " + it);
+		while (it.hasNext()) {
+		EvalResult eval = it.next();
+		System.out.println("u while eval " + eval + eval.getString());
+		Nalog nalog = (Nalog) unmarsaller.unmarshal(new StringReader(
+		eval.getString()));
+		listaNaloga.add(nalog);
+		}
+		} catch (Exception e) {
+		e.printStackTrace();
+		}
+	/*	
 		String odgovorUplata = posaljiUpit(upitPre1);
-		System.out.println("POSle slanjaaa");
+		
 		Nalozi listaNaloga = null;
 		
 		if (odgovorUplata == null) {
-
+System.out.println("odgovor je nuuul");
 			// sta ako nema????
 			listaNaloga = new Nalozi();
 			return null;
@@ -1097,16 +1128,24 @@ System.out.println("kon2: "+kon2);
 						new StringReader(odgovorUplata)));
 			} catch (JAXBException e) {
 				e.printStackTrace();
-			}
+			}*/
 			
 			Presek presek = new Presek();
 			StavkaPreseka stavka;
 
 			int rbrPreseka = zahtevZaIzvod.getRbrPreseka().intValue() - 1;
 
-			for (int i = rbrPreseka * brojStavki; i < i + brojStavki; i++) {
-				if (listaNaloga.getNalozi().size() >= i) {
-					Nalog n = listaNaloga.getNalozi().get(i);
+			System.out.println("Lista nalog size: "+listaNaloga.size());
+			for(Nalog n:listaNaloga){
+				System.out.println(n.getDuznik()+" : "+n.getIznos());
+			}
+			BigDecimal ukupanIznos=new BigDecimal(0);
+			for (int i = rbrPreseka * brojStavki; i < rbrPreseka * brojStavki + brojStavki; i++) {
+				if (listaNaloga.size() > i) {
+					System.out.println("usao u if");
+					
+					Nalog n = listaNaloga.get(i);
+					ukupanIznos.add(n.getIznos());
 					stavka = new StavkaPreseka(n.getDuznik(), n.getSvrhaPlacanja(),
 							n.getPrimalac(), n.getDatumNaloga(),
 							n.getDatumValute(), n.getRacunDuznik(),
@@ -1114,6 +1153,8 @@ System.out.println("kon2: "+kon2);
 							n.getRacunPoverioca(), n.getModelOdobrenja(),
 							n.getPozivNaBrOdobrenja(), n.getIznos(), "a");
 					presek.getStavkaPreseka().add(stavka);
+				}else{
+					break;
 				}
 			}
 
@@ -1121,8 +1162,13 @@ System.out.println("kon2: "+kon2);
 			zaglavlje.setBrojPreseka(zahtevZaIzvod.getRbrPreseka());
 			zaglavlje.setBrojRacuna(zahtevZaIzvod.getBrojRacuna());
 			zaglavlje.setDatumNaloga(zahtevZaIzvod.getDatum());
-			// NE MOGU OVO DA SETUJEM STARO I NOVO STANJE, BEZ BANKE???
-			// ??????????????
+			zaglavlje.setBrPromenaNaTeret(0);
+			zaglavlje.setBrPromenaUKorist(listaNaloga.size());
+			zaglavlje.setNovoStanje(banka.getRacunIznos().get(zahtevZaIzvod.getBrojRacuna()).getRaspolozivoStanje());
+			zaglavlje.setPrethodnoStanje(zaglavlje.getNovoStanje().subtract(ukupanIznos));
+			zaglavlje.setUkupnoNaTeret(new BigDecimal(0));
+			zaglavlje.setUkupnoUKorist(ukupanIznos);
+			
 
 			presek.setZaglavljePreseka(zaglavlje);
 
@@ -1131,7 +1177,7 @@ System.out.println("kon2: "+kon2);
 		}
 
 	
-	}
+//	}
 
 	public String posaljiUpit(String upit) {
 		ServerEvaluationCall poziv = StartApp.getClient().newServerEval();
