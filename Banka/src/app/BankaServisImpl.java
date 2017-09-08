@@ -535,7 +535,7 @@ System.out.println("oznaka: "+oznakaBankePrimaoca);
 						String kon = sw.toString().substring(
 								sw.toString().indexOf("mt102") -1,
 								sw.toString().length());
-						System.out.println(kon);
+						
 						String upit =// "declare namespace mt102='http://ftn.uns.ac.rs/mt102';"
 								" xdmp:node-insert-child(doc('/content/mt102.xml')/mt102S,"
 								+kon + ");";
@@ -726,7 +726,7 @@ System.out.println("oznaka: "+oznakaBankePrimaoca);
 			System.out.println("OBRACUNSKI RACUN BANKE DUZNIKA PRE VRACANJA PARA: " + bankaDuznika.getIznosObracunskiRacun());
 
 			noviIznos = bankaDuznika.getIznosObracunskiRacun().add(
-					mt102.getZaglavljeMt102().getUkupanIznos());
+					mt900.getIznos());
 			bankaDuznika.setIznosObracunskiRacun(noviIznos);
 			
 	
@@ -741,7 +741,8 @@ System.out.println("oznaka: "+oznakaBankePrimaoca);
 				String brojRacunaDuznik=poj.getRacunDuznik();
 				// SAD SKIDAM IZNOS SA RACUNA DUZNIKA TAKO STO MU UZMEM REZERVISANO
 				bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
-						.setRezervisanoStanje(new BigDecimal(0));
+						.setRezervisanoStanje(bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
+								.getRezervisanoStanje().subtract(poj.getIznos()));
 				// UPISI NOVO RACUN IZNOS U BANKUDUYNIKA NA NJEGOVO MESTO U MAPI PO
 				// NJEGOVOM RACUNU
 				System.out.println("----------------------");
@@ -799,12 +800,9 @@ System.out.println("oznaka: "+oznakaBankePrimaoca);
 			// iznos sa naloga.
 
 			noviIznos = bankaDuznika.getIznosObracunskiRacun().add(
-					bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
-							.getRezervisanoStanje());
+					mt900.getIznos());
 			
-			System.out.println("iznos koji se prebacuje rezervisano : "+ 
-					bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
-							.getRezervisanoStanje() + " ono sa naloga " + nal.getIznos());
+			
 			
 			bankaDuznika.setIznosObracunskiRacun(noviIznos);
 			
@@ -818,7 +816,7 @@ System.out.println("oznaka: "+oznakaBankePrimaoca);
 			
 			// SAD SKIDAM IZNOS SA RACUNA DUZNIKA TAKO STO MU UZMEM REZERVISANO
 			bankaDuznika.getRacunIznos().get(brojRacunaDuznik)
-					.setRezervisanoStanje(new BigDecimal(0));
+					.setRezervisanoStanje(bankaDuznika.getRacunIznos().get(brojRacunaDuznik).getRezervisanoStanje().subtract(mt900.getIznos()));
 			// UPISI NOVO RACUN IZNOS U BANKUDUYNIKA NA NJEGOVO MESTO U MAPI PO
 			// NJEGOVOM RACUNU
 			System.out.println("----------------------");
@@ -1140,12 +1138,14 @@ System.out.println("odgovor je nuuul");
 				System.out.println(n.getDuznik()+" : "+n.getIznos());
 			}
 			BigDecimal ukupanIznos=new BigDecimal(0);
+			int brojUKorist=0;
 			for (int i = rbrPreseka * brojStavki; i < rbrPreseka * brojStavki + brojStavki; i++) {
 				if (listaNaloga.size() > i) {
 					System.out.println("usao u if");
 					
 					Nalog n = listaNaloga.get(i);
-					ukupanIznos.add(n.getIznos());
+					ukupanIznos=ukupanIznos.add(n.getIznos());
+					brojUKorist++;
 					stavka = new StavkaPreseka(n.getDuznik(), n.getSvrhaPlacanja(),
 							n.getPrimalac(), n.getDatumNaloga(),
 							n.getDatumValute(), n.getRacunDuznik(),
@@ -1163,13 +1163,12 @@ System.out.println("odgovor je nuuul");
 			zaglavlje.setBrojRacuna(zahtevZaIzvod.getBrojRacuna());
 			zaglavlje.setDatumNaloga(zahtevZaIzvod.getDatum());
 			zaglavlje.setBrPromenaNaTeret(0);
-			zaglavlje.setBrPromenaUKorist(listaNaloga.size());
+			zaglavlje.setBrPromenaUKorist(brojUKorist);
 			zaglavlje.setNovoStanje(banka.getRacunIznos().get(zahtevZaIzvod.getBrojRacuna()).getRaspolozivoStanje());
 			zaglavlje.setPrethodnoStanje(zaglavlje.getNovoStanje().subtract(ukupanIznos));
 			zaglavlje.setUkupnoNaTeret(new BigDecimal(0));
 			zaglavlje.setUkupnoUKorist(ukupanIznos);
 			
-
 			presek.setZaglavljePreseka(zaglavlje);
 
 			return presek;
